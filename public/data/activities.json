@@ -9,7 +9,8 @@
     "description": "Founder of Arduino discusses the future of open-source hardware",
     "category": "keynote",
     "capacity": 500,
-    "registered": 420
+    "registered": 420,
+    "livestreamId": "stream1"
   },
   {
     "id": "activity-2",
@@ -21,7 +22,8 @@
     "description": "Perfect for beginners - learn Arduino basics in 90 minutes",
     "category": "workshop",
     "capacity": 30,
-    "registered": 28
+    "registered": 28,
+    "livestreamId": "stream2"
   },
   {
     "id": "activity-3",
@@ -33,7 +35,8 @@
     "description": "Connect Arduino to cloud platforms and build smart devices",
     "category": "workshop",
     "capacity": 30,
-    "registered": 25
+    "registered": 25,
+    "livestreamId": "stream3"
   },
   {
     "id": "activity-4",
@@ -45,7 +48,8 @@
     "description": "Advanced techniques for building autonomous robots with Arduino",
     "category": "workshop",
     "capacity": 50,
-    "registered": 42
+    "registered": 42,
+    "livestreamId": "stream4"
   },
   {
     "id": "activity-5",
@@ -57,7 +61,8 @@
     "description": "Rapid prototyping techniques and best practices",
     "category": "workshop",
     "capacity": 30,
-    "registered": 29
+    "registered": 29,
+    "livestreamId": "stream5"
   },
   {
     "id": "activity-6",
@@ -69,7 +74,8 @@
     "description": "How Arduino is used in space exploration and research",
     "category": "keynote",
     "capacity": 500,
-    "registered": 385
+    "registered": 385,
+    "livestreamId": "stream6"
   },
   {
     "id": "activity-7",

@@ -2,11 +2,13 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Building, Radio, ChevronUp, ChevronDown, Clock, Users, Menu, X, Layers, MapPin } from 'lucide-react'
+import { Building, Radio, ChevronUp, ChevronDown, Clock, Users, Menu, X, Layers, MapPin, PlayCircle } from 'lucide-react'
 import Building3D from '@/components/Building3D'
 import { useVenues, useActivities, useFloors } from '@/lib/hooks/useData'
 import { getVenuesByFloor, getActivitiesByVenue, getVenueTypeLabel } from '@/lib/utils/helpers'
 import { APP_CONFIG } from '@/lib/constants/config'
+import StreamModal from '@/components/StreamModal'
+import { LiveStream } from '@/lib/types'
 
 export default function Home() {
   const [currentFloor, setCurrentFloor] = useState(0)
@@ -16,11 +18,27 @@ export default function Home() {
   const [floorMenuOpen, setFloorMenuOpen] = useState(false)
   const [venueMenuOpen, setVenueMenuOpen] = useState(false)
   const [quickNavOpen, setQuickNavOpen] = useState(false)
+  const [selectedStream, setSelectedStream] = useState<LiveStream | null>(null)
+  const [streams, setStreams] = useState<LiveStream[]>([])
 
   // Load data from JSON files using custom hooks
   const { venues, loading: venuesLoading } = useVenues()
   const { activities, loading: activitiesLoading } = useActivities()
   const { floors, loading: floorsLoading } = useFloors()
+
+  // Load livestreams
+  React.useEffect(() => {
+    const fetchStreams = async () => {
+      try {
+        const res = await fetch('/data/livestreams.json')
+        const data = await res.json()
+        setStreams(data)
+      } catch (error) {
+        console.error('Error loading streams:', error)
+      }
+    }
+    fetchStreams()
+  }, [])
 
   const handleFloorChange = (direction: 'up' | 'down') => {
     if (direction === 'up' && currentFloor < APP_CONFIG.building.floors - 1) {
@@ -34,6 +52,20 @@ export default function Home() {
   const selectedVenueData = venues.find(v => v.id === selectedVenue)
   const hoveredVenueData = venues.find(v => v.id === hoveredVenue)
   const venueActivities = selectedVenueData ? getActivitiesByVenue(activities, selectedVenueData.id) : []
+
+  // Helper function to get stream for an activity
+  const getStreamForActivity = (activity: any) => {
+    if (!activity.livestreamId) return null
+    return streams.find(s => s.id === activity.livestreamId) || null
+  }
+
+  // Helper function to open stream modal
+  const handleOpenStream = (streamId: string) => {
+    const stream = streams.find(s => s.id === streamId)
+    if (stream) {
+      setSelectedStream(stream)
+    }
+  }
 
   // Show loading state
   if (venuesLoading || activitiesLoading || floorsLoading) {
@@ -340,23 +372,48 @@ export default function Home() {
                 <span className="truncate">{selectedVenueData?.name}</span>
               </h3>
               <div className="space-y-1.5 sm:space-y-2">
-                {venueActivities.map(activity => (
-                  <div key={activity.id} className="text-xs sm:text-sm bg-slate-800/50 p-2 rounded-lg border border-slate-600/50">
-                    <div className="text-blue-300 font-semibold truncate">{activity.title}</div>
-                    <div className="text-slate-300 text-[10px] sm:text-xs mt-0.5 truncate">{activity.speaker}</div>
-                    <div className="flex items-center gap-2 text-slate-400 text-[10px] sm:text-xs mt-1.5">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                        <span className="hidden sm:inline">{activity.startTime} - {activity.endTime}</span>
-                        <span className="sm:hidden">{activity.startTime}</span>
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                        {activity.registered}/{activity.capacity}
-                      </span>
+                {venueActivities.map(activity => {
+                  const activityStream = getStreamForActivity(activity)
+                  return (
+                    <div key={activity.id} className="text-xs sm:text-sm bg-slate-800/50 p-2 rounded-lg border border-slate-600/50">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="text-blue-300 font-semibold truncate">{activity.title}</div>
+                          <div className="text-slate-300 text-[10px] sm:text-xs mt-0.5 truncate">{activity.speaker}</div>
+                          <div className="flex items-center gap-2 text-slate-400 text-[10px] sm:text-xs mt-1.5">
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                              <span className="hidden sm:inline">{activity.startTime} - {activity.endTime}</span>
+                              <span className="sm:hidden">{activity.startTime}</span>
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                              {activity.registered}/{activity.capacity}
+                            </span>
+                          </div>
+                        </div>
+                        {activityStream && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOpenStream(activityStream.id)
+                            }}
+                            className="flex-shrink-0 p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-all transform hover:scale-110 active:scale-95 shadow-lg hover:shadow-red-500/50"
+                            title="Watch livestream"
+                          >
+                            <PlayCircle className="w-4 h-4 text-white" />
+                          </button>
+                        )}
+                      </div>
+                      {activityStream && (
+                        <div className="mt-2 flex items-center gap-1.5 text-[10px] text-red-400">
+                          <Radio className="w-3 h-3 animate-pulse" />
+                          <span className="font-semibold">{activityStream.status === 'live' ? 'STREAMING NOW' : 'Stream Available'}</span>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}
@@ -570,6 +627,13 @@ export default function Home() {
 
 
       </div>
+
+      {/* Stream Modal */}
+      <StreamModal
+        isOpen={!!selectedStream}
+        onClose={() => setSelectedStream(null)}
+        stream={selectedStream}
+      />
     </div>
   )
 }

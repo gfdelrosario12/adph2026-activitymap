@@ -34,6 +34,7 @@ export interface Activity {
   category: string
   capacity: number
   registered: number
+  livestreamId?: string // Optional: links to a livestream
 }
 
 export interface Floor {
