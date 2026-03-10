@@ -25,6 +25,8 @@ export default function StreamCard({
   description,
   onClick,
 }: StreamCardProps) {
+  const [imageError, setImageError] = React.useState(false)
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -32,62 +34,69 @@ export default function StreamCard({
       onClick={onClick}
       className="group cursor-pointer"
     >
-      <div className="relative overflow-hidden rounded-lg bg-slate-800">
+      <div className="relative overflow-hidden rounded-lg bg-slate-800 shadow-lg hover:shadow-xl transition-shadow">
         {/* Thumbnail */}
-        <div className="relative w-full aspect-video">
-          <Image
-            src={thumbnail}
-            alt={title}
-            fill
-            className="object-cover group-hover:scale-110 transition-transform duration-300"
-          />
+        <div className="relative w-full aspect-video bg-black">
+          {thumbnail && !imageError ? (
+            <Image
+              src={thumbnail}
+              alt={title}
+              fill
+              className="object-cover group-hover:scale-110 transition-transform duration-300"
+              unoptimized
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Users className="w-16 h-16 text-slate-800" />
+            </div>
+          )}
 
           {/* Live Badge */}
           {isLive && (
-            <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+            <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 z-10">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
               LIVE
             </div>
           )}
 
           {/* Quality Badge */}
-          <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-xs font-semibold">
+          <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-sm text-white px-2 py-1 rounded text-xs font-semibold z-10">
             {quality}
           </div>
 
-          {/* Play Button */}
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all">
+          {/* Play Button Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all">
             <motion.div
-              whileHover={{ scale: 1.1 }}
-              className="bg-white bg-opacity-90 group-hover:bg-opacity-100 p-4 rounded-full transition-all"
+              initial={{ scale: 1, opacity: 0.9 }}
+              whileHover={{ scale: 1.1, opacity: 1 }}
+              className="bg-white/90 group-hover:bg-white p-4 rounded-full transition-all shadow-lg"
             >
               <Play className="w-6 h-6 text-slate-900 fill-slate-900" />
             </motion.div>
           </div>
 
           {/* Viewers Badge */}
-          <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
+          <div className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs flex items-center gap-1 z-10">
             <Users className="w-3 h-3" />
-            {viewers.toLocaleString()}
+            {viewers?.toLocaleString() || 0}
           </div>
         </div>
 
         {/* Info */}
-        <div className="p-4">
-          <h3 className="font-semibold text-white truncate group-hover:text-blue-400 transition-colors">
+        <div className="p-4 bg-slate-800">
+          <h3 className="font-semibold text-white truncate group-hover:text-green-400 transition-colors">
             {title}
           </h3>
           <p className="text-slate-400 text-sm mt-1 line-clamp-2">{description}</p>
 
           {/* Stream Status */}
-          <div className="flex items-center gap-2 mt-3 text-xs">
-            {isLive && (
-              <>
-                <Volume2 className="w-3 h-3 text-red-500" />
-                <span className="text-red-500 font-semibold">Live Now</span>
-              </>
-            )}
-          </div>
+          {isLive && (
+            <div className="flex items-center gap-2 mt-3 text-xs">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              <span className="text-red-400 font-semibold">Live Now</span>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>
