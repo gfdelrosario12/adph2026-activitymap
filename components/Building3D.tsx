@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { OrbitControls, Environment, Lightformer } from '@react-three/drei'
+import { OrbitControls, Environment, Lightformer, Text } from '@react-three/drei'
 import * as THREE from 'three'
 import { Venue, Activity } from '@/lib/types'
 import ProgramFlowModal from './ProgramFlowModal'
@@ -15,15 +15,38 @@ interface Building3DProps {
   externalSelectedVenue?: string | null
 }
 
-// Camera animation component - Optimized
-function CameraController({ target, enabled }: { target: [number, number, number], enabled: boolean }) {
+interface VenueBoxProps {
+  venue: Venue
+  isSelected: boolean
+  isOnCurrentFloor: boolean
+  onClick: () => void
+  onHover: (hovered: boolean) => void
+  isHovered: boolean
+  isMobile: boolean
+}
+
+// Camera animation component - Optimized with early returns
+const CameraController = React.memo(function CameraController({ 
+  target, 
+  enabled 
+}: { 
+  target: [number, number, number]
+  enabled: boolean 
+}) {
   const { camera, controls } = useThree()
   const targetRef = useRef(new THREE.Vector3())
   const lookAtRef = useRef(new THREE.Vector3())
+  const lastTargetRef = useRef<[number, number, number]>(target)
   
   useEffect(() => {
-    targetRef.current.set(...target)
-    lookAtRef.current.set(target[0] - 15, target[1] - 10, target[2] - 15)
+    // Only update if target actually changed
+    if (lastTargetRef.current[0] !== target[0] || 
+        lastTargetRef.current[1] !== target[1] || 
+        lastTargetRef.current[2] !== target[2]) {
+      targetRef.current.set(...target)
+      lookAtRef.current.set(target[0] - 15, target[1] - 10, target[2] - 15)
+      lastTargetRef.current = target
+    }
   }, [target])
   
   useFrame(() => {
@@ -36,419 +59,249 @@ function CameraController({ target, enabled }: { target: [number, number, number
     
     // Smooth lerp with easing
     camera.position.lerp(targetRef.current, 0.08)
-    // @ts-ignore - OrbitControls has target property
+    // @ts-ignore
     controls.target.lerp(lookAtRef.current, 0.08)
     // @ts-ignore
     controls.update()
   })
   
   return null
-}
+})
 
-function VenueBoxComponent({
+// Individual venue box component - Memoized for performance
+const VenueBoxComponent = React.memo(function VenueBoxComponent({
   venue,
   isSelected,
   isOnCurrentFloor,
   onClick,
   onHover,
   isHovered,
-  isMobile = false,
-}: {
-  venue: Venue
-  isSelected: boolean
-  isOnCurrentFloor: boolean
-  onClick: () => void
-  onHover: (hovered: boolean) => void
-  isHovered: boolean
-  isMobile?: boolean
-}) {
+  isMobile,
+}: VenueBoxProps) {
   const meshRef = useRef<THREE.Mesh>(null)
-  const [localHovered, setLocalHovered] = React.useState(false)
+  
+  // Memoize computed values
+  const baseOpacity = useMemo(() => isOnCurrentFloor ? 0.95 : 0.25, [isOnCurrentFloor])
+  const emissiveIntensity = useMemo(() => isHovered ? 3.5 : isSelected ? 4.0 : 0.8, [isHovered, isSelected])
+  const scale = useMemo(() => isHovered ? 1.08 : isSelected ? 1.05 : 1, [isHovered, isSelected])
+  const displayName = useMemo(() => 
+    venue.name.length > 20 ? venue.name.substring(0, 17) + '...' : venue.name,
+    [venue.name]
+  )
+  const fontSize = useMemo(() => Math.min(venue.size.width, venue.size.depth) * 0.15, [venue.size.width, venue.size.depth])
 
-  const handlePointerOver = () => {
-    if (!isMobile) {  // Disable hover on mobile for better performance
-      setLocalHovered(true)
-      onHover(true)
-    }
-  }
+  // Enhanced glow colors
+  const glowColor = useMemo(() => {
+    if (isSelected) return '#FFD700' // Bright gold
+    if (isHovered) return '#00FFFF' // Cyan
+    return '#00FF00' // Green
+  }, [isSelected, isHovered])
 
-  const handlePointerOut = () => {
-    if (!isMobile) {
-      setLocalHovered(false)
-      onHover(false)
-    }
-  }
-
-  useFrame(() => {
-    if (meshRef.current) {
-      if (isSelected) {
-        meshRef.current.scale.lerp(new THREE.Vector3(1.15, 1.15, 1.15), 0.1)
-      } else if (localHovered || isHovered) {
-        meshRef.current.scale.lerp(new THREE.Vector3(1.12, 1.12, 1.12), 0.15)
-      } else {
-        meshRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1)
-      }
+  useFrame((state) => {
+    if (!meshRef.current) return
+    
+    if (isSelected) {
+      meshRef.current.position.y = venue.position.y + Math.sin(state.clock.elapsedTime * 2) * 0.3
+    } else {
+      meshRef.current.position.y = venue.position.y
     }
   })
 
-  const opacity = isOnCurrentFloor ? 0.98 : 0.12
-  const renderOrder = isOnCurrentFloor ? 10 : 1
+  const handlePointerEnter = useCallback(() => {
+    if (!isMobile) onHover(true)
+  }, [isMobile, onHover])
 
-  // Enhanced hover highlighting
-  const isHighlighted = !isMobile && (localHovered || isHovered)
-
-  // Make venues more square-shaped for better visibility
-  const avgSize = (venue.size.width + venue.size.depth) / 2
-  const squareSize = {
-    width: avgSize,
-    height: venue.size.height,
-    depth: avgSize
-  }
+  const handlePointerLeave = useCallback(() => {
+    if (!isMobile) onHover(false)
+  }, [isMobile, onHover])
 
   return (
-    <group>
-      {/* Main venue box - proper rectangular room shape */}
-      <mesh
-        ref={meshRef}
-        position={[venue.position.x, venue.position.y, venue.position.z]}
-        onClick={onClick}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}
-        castShadow
-        receiveShadow
-        renderOrder={renderOrder}
-      >
-        <boxGeometry args={[squareSize.width, squareSize.height, squareSize.depth]} />
+    <group
+      position={[venue.position.x, venue.position.y, venue.position.z]}
+      onClick={onClick}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+    >
+      {/* Main Floor - Solid Colored Rectangle */}
+      <mesh ref={meshRef} castShadow receiveShadow scale={scale} position={[0, 0.15, 0]}>
+        <boxGeometry args={[venue.size.width, 0.3, venue.size.depth]} />
         <meshStandardMaterial
-          color={isSelected ? '#FBBF24' : isHighlighted ? '#60A5FA' : venue.color}
-          metalness={0.4}
-          roughness={0.3}
-          emissive={isSelected ? '#F59E0B' : isHighlighted ? '#3B82F6' : isOnCurrentFloor ? venue.color : '#000000'}
-          emissiveIntensity={isSelected ? 2.5 : isHighlighted ? 2.0 : isOnCurrentFloor ? 0.8 : 0}
-          toneMapped={false}
+          color={venue.color}
           transparent
-          opacity={opacity}
+          opacity={baseOpacity}
+          emissive={venue.color}
+          emissiveIntensity={emissiveIntensity}
+          metalness={0.5}
+          roughness={0.3}
         />
       </mesh>
 
-      {/* Floor plan base - solid colored rectangle showing room footprint */}
-      {isOnCurrentFloor && (
-        <mesh
-          position={[venue.position.x, venue.position.y - squareSize.height / 2 + 0.02, venue.position.z]}
-          rotation={[-Math.PI / 2, 0, 0]}
-        >
-          <planeGeometry args={[squareSize.width, squareSize.depth]} />
-          <meshStandardMaterial
-            color={isSelected ? '#FCD34D' : isHighlighted ? '#60A5FA' : venue.color}
-            metalness={0.6}
-            roughness={0.4}
-            emissive={isSelected ? '#F59E0B' : isHighlighted ? '#3B82F6' : venue.color}
-            emissiveIntensity={isSelected ? 1.0 : isHighlighted ? 0.8 : 0.5}
-            toneMapped={false}
-            transparent
-            opacity={isSelected ? 0.95 : isHighlighted ? 0.95 : 0.9}
-          />
-        </mesh>
-      )}
+      {/* Floor Border - Enhanced contrast */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[venue.size.width + 0.3, 0.15, venue.size.depth + 0.3]} />
+        <meshStandardMaterial 
+          color="#000000" 
+          transparent 
+          opacity={baseOpacity * 0.9}
+          metalness={0.6}
+          roughness={0.4}
+        />
+      </mesh>
 
-      {/* Room boundaries - thick border lines showing exact room shape */}
+      {/* Complete Room Walls */}
       {isOnCurrentFloor && (
         <>
-          {/* Bottom border (rectangle outline) */}
-          {[
-            // Front edge
-            { start: [-squareSize.width/2, 0, -squareSize.depth/2], end: [squareSize.width/2, 0, -squareSize.depth/2] },
-            // Right edge
-            { start: [squareSize.width/2, 0, -squareSize.depth/2], end: [squareSize.width/2, 0, squareSize.depth/2] },
-            // Back edge
-            { start: [squareSize.width/2, 0, squareSize.depth/2], end: [-squareSize.width/2, 0, squareSize.depth/2] },
-            // Left edge
-            { start: [-squareSize.width/2, 0, squareSize.depth/2], end: [-squareSize.width/2, 0, -squareSize.depth/2] },
-          ].map((edge, idx) => (
-            <mesh
-              key={`boundary-${idx}`}
-              position={[
-                venue.position.x + (edge.start[0] + edge.end[0]) / 2,
-                venue.position.y + 0.1,
-                venue.position.z + (edge.start[2] + edge.end[2]) / 2
-              ]}
-              rotation={idx % 2 === 0 ? [0, 0, 0] : [0, Math.PI / 2, 0]}
-            >
-              <boxGeometry args={[
-                idx % 2 === 0 ? squareSize.width : squareSize.depth,
-                0.3,
-                0.15
-              ]} />
-              <meshStandardMaterial
-                color={isSelected ? '#FFFFFF' : isHighlighted ? '#60A5FA' : '#1e293b'}
-                metalness={0.8}
-                roughness={0.2}
-                emissive={isSelected ? '#FBBF24' : isHighlighted ? '#3B82F6' : '#000000'}
-                emissiveIntensity={isSelected ? 1.5 : isHighlighted ? 1.2 : 0}
-              />
-            </mesh>
-          ))}
-        </>
-      )}
-
-      {/* Interior details and room divisions - floor plan style */}
-      {isOnCurrentFloor && !isMobile && (
-        <group position={[venue.position.x, venue.position.y + 0.15, venue.position.z]}>
-          {/* Room grid lines - showing seating/desk arrangement */}
-          {Array.from({ length: Math.min(5, Math.floor(squareSize.width / 5)) }).map((_, i) => (
-            <React.Fragment key={`grid-${i}`}>
-              {/* Vertical divider lines */}
-              <mesh position={[-squareSize.width/2 + (i + 1) * (squareSize.width / (Math.floor(squareSize.width / 5) + 1)), 0, 0]}>
-                <boxGeometry args={[0.05, 0.02, squareSize.depth * 0.9]} />
-                <meshStandardMaterial
-                  color="#64748b"
-                  transparent
-                  opacity={0.3}
-                />
-              </mesh>
-              {/* Horizontal divider lines */}
-              <mesh position={[0, 0, -squareSize.depth/2 + (i + 1) * (squareSize.depth / (Math.floor(squareSize.depth / 5) + 1))]}>
-                <boxGeometry args={[squareSize.width * 0.9, 0.02, 0.05]} />
-                <meshStandardMaterial
-                  color="#64748b"
-                  transparent
-                  opacity={0.3}
-                />
-              </mesh>
-            </React.Fragment>
-          ))}
-
-          {/* Furniture/Desk placements when selected - proper rectangular shapes */}
-          {(isSelected || isHighlighted) && (
-            <>
-              {Array.from({ length: Math.min(5, Math.floor(squareSize.width / 4)) }).map((_, i) => (
-                <React.Fragment key={`furniture-${i}`}>
-                  {/* Rectangular desks/tables */}
-                  <mesh position={[-squareSize.width/3 + i * (squareSize.width/2.5), 0.15, squareSize.depth/4]}>
-                    <boxGeometry args={[Math.min(3, squareSize.width/6), 0.1, Math.min(2, squareSize.depth/8)]} />
-                    <meshStandardMaterial
-                      color="#8B4513"
-                      metalness={0.2}
-                      roughness={0.8}
-                      emissive={isHighlighted ? '#60A5FA' : '#000000'}
-                      emissiveIntensity={isHighlighted ? 0.3 : 0}
-                    />
-                  </mesh>
-                  {/* Chairs - small squares */}
-                  <mesh position={[-squareSize.width/3 + i * (squareSize.width/2.5), 0.2, squareSize.depth/4 + 1.2]}>
-                    <boxGeometry args={[0.5, 0.5, 0.5]} />
-                    <meshStandardMaterial
-                      color="#2c3e50"
-                      metalness={0.3}
-                      roughness={0.7}
-                      emissive={isHighlighted ? '#60A5FA' : '#000000'}
-                      emissiveIntensity={isHighlighted ? 0.3 : 0}
-                    />
-                  </mesh>
-                </React.Fragment>
-              ))}
-
-              {/* Podium/Stage area - rectangular platform */}
-              <mesh position={[0, 0.1, -squareSize.depth/3]}>
-                <boxGeometry args={[Math.min(4, squareSize.width/5), 0.2, Math.min(3, squareSize.depth/7)]} />
-                <meshStandardMaterial
-                  color="#34495e"
-                  metalness={0.4}
-                  roughness={0.6}
-                  emissive={isHighlighted ? '#60A5FA' : '#000000'}
-                  emissiveIntensity={isHighlighted ? 0.3 : 0}
-                />
-              </mesh>
-            </>
-          )}
-
-          {/* Internal room partitions for larger venues */}
-          {squareSize.width > 15 && (isSelected || isHighlighted) && (
-            <>
-              {/* Main partition wall - vertical */}
-              <mesh position={[squareSize.width/4, 0.8, 0]} rotation={[0, 0, 0]}>
-                <boxGeometry args={[0.1, 1.5, squareSize.depth * 0.7]} />
-                <meshStandardMaterial
-                  color="#95a5a6"
-                  transparent
-                  opacity={isSelected ? 0.5 : 0.3}
-                  metalness={0.5}
-                  roughness={0.5}
-                />
-              </mesh>
-              <mesh position={[-squareSize.width/4, 0.8, 0]} rotation={[0, 0, 0]}>
-                <boxGeometry args={[0.1, 1.5, squareSize.depth * 0.7]} />
-                <meshStandardMaterial
-                  color="#95a5a6"
-                  transparent
-                  opacity={isSelected ? 0.5 : 0.3}
-                  metalness={0.5}
-                  roughness={0.5}
-                />
-              </mesh>
-
-              {/* Doorway indicators - gaps in walls */}
-              <mesh position={[0, 0.5, squareSize.depth/2 - 0.1]}>
-                <boxGeometry args={[1.5, 2, 0.15]} />
-                <meshStandardMaterial
-                  color="#1e293b"
-                  metalness={0.6}
-                  roughness={0.4}
-                />
-              </mesh>
-            </>
-          )}
-        </group>
-      )}
-
-      {/* Glowing outline - proper rectangular border showing room shape */}
-      {isOnCurrentFloor && (
-        <>
-          {/* Main room outline - box edges */}
-          <lineSegments
-            position={[venue.position.x, venue.position.y + squareSize.height / 2, venue.position.z]}
-            renderOrder={renderOrder + 1}
-          >
-            <edgesGeometry args={[new THREE.BoxGeometry(squareSize.width, squareSize.height, squareSize.depth)]} />
-            <lineBasicMaterial
-              color={isSelected ? '#FBBF24' : isHighlighted ? '#60A5FA' : venue.color}
-              linewidth={isSelected ? 4 : isHighlighted ? 3 : 2}
+          {/* North Wall */}
+          <mesh position={[0, venue.size.height / 2, venue.size.depth / 2]} castShadow>
+            <boxGeometry args={[venue.size.width, venue.size.height, 0.15]} />
+            <meshStandardMaterial
+              color={venue.color}
               transparent
-              opacity={isSelected ? 1 : isHighlighted ? 1 : 0.7}
-            />
-          </lineSegments>
-
-          {/* Enhanced glow effect for hovered venue */}
-          {isHighlighted && !isSelected && (
-            <mesh
-              position={[venue.position.x, venue.position.y + squareSize.height / 2, venue.position.z]}
-            >
-              <boxGeometry args={[squareSize.width + 0.5, squareSize.height + 0.5, squareSize.depth + 0.5]} />
-              <meshBasicMaterial
-                color="#60A5FA"
-                transparent
-                opacity={0.2}
-                toneMapped={false}
-              />
-            </mesh>
-          )}
-
-          {/* Floor plan border - thick rectangle at ground level */}
-          <lineSegments
-            position={[venue.position.x, venue.position.y + 0.15, venue.position.z]}
-            rotation={[-Math.PI / 2, 0, 0]}
-            renderOrder={renderOrder + 2}
-          >
-            <edgesGeometry args={[new THREE.PlaneGeometry(squareSize.width, squareSize.depth)]} />
-            <lineBasicMaterial
-              color={isSelected ? '#FFFFFF' : isHighlighted ? '#60A5FA' : '#1e293b'}
-              linewidth={isSelected ? 6 : isHighlighted ? 5 : 3}
-              transparent
-              opacity={1}
-            />
-          </lineSegments>
-        </>
-      )}
-
-      {/* Floor indicator beam for current floor */}
-      {isOnCurrentFloor && !isSelected && !isHighlighted && (
-        <mesh position={[venue.position.x, venue.position.y - 0.5, venue.position.z]}>
-          <cylinderGeometry args={[0.5, 0.8, 1, 6]} />
-          <meshStandardMaterial
-            color={venue.color}
-            emissive={venue.color}
-            emissiveIntensity={0.5}
-            transparent
-            opacity={0.6}
-          />
-        </mesh>
-      )}
-
-      {/* Active Floor Pedestal - Rectangular ring matching room shape */}
-      {isOnCurrentFloor && (
-        <>
-          {/* Outer glow ring - rectangular */}
-          <mesh position={[venue.position.x, venue.position.y + 0.02, venue.position.z]} rotation={[-Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[
-              Math.max(squareSize.width, squareSize.depth) / 1.8,
-              Math.max(squareSize.width, squareSize.depth) / 1.6,
-              4  // 4 segments makes it square/rectangular
-            ]} />
-            <meshBasicMaterial
-              color={isHighlighted ? '#60A5FA' : venue.color}
-              transparent
-              opacity={isSelected ? 0.6 : isHighlighted ? 0.7 : 0.4}
-              toneMapped={false}
+              opacity={0.6}
+              emissive={venue.color}
+              emissiveIntensity={emissiveIntensity * 0.8}
+              metalness={0.4}
+              roughness={0.5}
             />
           </mesh>
-
-          {/* Enhanced hover ring - pulsing effect */}
-          {isHighlighted && !isSelected && (
-            <mesh position={[venue.position.x, venue.position.y + 0.08, venue.position.z]} rotation={[-Math.PI / 2, 0, 0]}>
-              <ringGeometry args={[
-                Math.max(squareSize.width, squareSize.depth) / 1.5,
-                Math.max(squareSize.width, squareSize.depth) / 1.3,
-                4
-              ]} />
-              <meshBasicMaterial
-                color="#60A5FA"
-                transparent
-                opacity={0.8}
-                toneMapped={false}
-              />
-            </mesh>
-          )}
-
-          {/* Corner markers - square room indicators */}
-          {[
-            [-squareSize.width/2, -squareSize.depth/2],
-            [squareSize.width/2, -squareSize.depth/2],
-            [-squareSize.width/2, squareSize.depth/2],
-            [squareSize.width/2, squareSize.depth/2],
-          ].map(([x, z], idx) => (
-            <mesh
-              key={`corner-${idx}`}
-              position={[venue.position.x + x, venue.position.y + 0.1, venue.position.z + z]}
-            >
-              <boxGeometry args={[0.3, 0.2, 0.3]} />
-              <meshStandardMaterial
-                color={venue.color}
-                emissive={venue.color}
-                emissiveIntensity={isSelected ? 2 : isHighlighted ? 1.5 : 1}
-                transparent
-                opacity={0.8}
-              />
-            </mesh>
-          ))}
+          
+          {/* South Wall */}
+          <mesh position={[0, venue.size.height / 2, -venue.size.depth / 2]} castShadow>
+            <boxGeometry args={[venue.size.width, venue.size.height, 0.15]} />
+            <meshStandardMaterial
+              color={venue.color}
+              transparent
+              opacity={0.6}
+              emissive={venue.color}
+              emissiveIntensity={emissiveIntensity * 0.8}
+              metalness={0.4}
+              roughness={0.5}
+            />
+          </mesh>
+          
+          {/* East Wall */}
+          <mesh position={[venue.size.width / 2, venue.size.height / 2, 0]} castShadow>
+            <boxGeometry args={[0.15, venue.size.height, venue.size.depth]} />
+            <meshStandardMaterial
+              color={venue.color}
+              transparent
+              opacity={0.6}
+              emissive={venue.color}
+              emissiveIntensity={emissiveIntensity * 0.8}
+              metalness={0.4}
+              roughness={0.5}
+            />
+          </mesh>
+          
+          {/* West Wall */}
+          <mesh position={[-venue.size.width / 2, venue.size.height / 2, 0]} castShadow>
+            <boxGeometry args={[0.15, venue.size.height, venue.size.depth]} />
+            <meshStandardMaterial
+              color={venue.color}
+              transparent
+              opacity={0.6}
+              emissive={venue.color}
+              emissiveIntensity={emissiveIntensity * 0.8}
+              metalness={0.4}
+              roughness={0.5}
+            />
+          </mesh>
         </>
       )}
 
-      {/* Spotlight effect for hovered venue */}
-      {isHighlighted && !isSelected && (
-        <pointLight
-          position={[venue.position.x, venue.position.y + squareSize.height + 5, venue.position.z]}
-          color="#60A5FA"
-          intensity={3}
-          distance={20}
-          decay={2}
-        />
+      {/* Enhanced Glow Effect with Pulsing Animation */}
+      {(isHovered || isSelected) && (
+        <>
+          {/* Primary Glow */}
+          <mesh position={[0, -0.05, 0]}>
+            <boxGeometry args={[venue.size.width * 1.2, 0.1, venue.size.depth * 1.2]} />
+            <meshBasicMaterial
+              color={glowColor}
+              transparent
+              opacity={0.9}
+            />
+          </mesh>
+          
+          {/* Secondary Outer Glow */}
+          <mesh position={[0, -0.08, 0]}>
+            <boxGeometry args={[venue.size.width * 1.3, 0.08, venue.size.depth * 1.3]} />
+            <meshBasicMaterial
+              color={glowColor}
+              transparent
+              opacity={0.5}
+            />
+          </mesh>
+          
+          {/* Vertical Light Beam for selected */}
+          {isSelected && (
+            <mesh position={[0, venue.size.height / 2 + 2, 0]}>
+              <cylinderGeometry args={[venue.size.width * 0.6, venue.size.width * 0.7, 4, 32]} />
+              <meshBasicMaterial
+                color={glowColor}
+                transparent
+                opacity={0.15}
+                side={THREE.DoubleSide}
+              />
+            </mesh>
+          )}
+        </>
+      )}
+
+      {/* Room Label */}
+      {isOnCurrentFloor && (
+        <Text
+          position={[0, 0.35, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          fontSize={fontSize}
+          color="white"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.15}
+          outlineColor="#000000"
+          maxWidth={venue.size.width * 0.9}
+        >
+          {displayName}
+        </Text>
       )}
     </group>
   )
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison for better memoization
+  return (
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.isOnCurrentFloor === nextProps.isOnCurrentFloor &&
+    prevProps.isHovered === nextProps.isHovered &&
+    prevProps.isMobile === nextProps.isMobile &&
+    prevProps.venue.id === nextProps.venue.id
+  )
+})
 
-function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors?: number; currentFloor: number; hasSelection: boolean }) {
+// Building Structure - Memoized for performance
+const BuildingStructure = React.memo(function BuildingStructure({ 
+  floors = 12, 
+  currentFloor, 
+  hasSelection 
+}: { 
+  floors?: number
+  currentFloor: number
+  hasSelection: boolean 
+}) {
   const floorHeight = 4
-  const buildingWidth = 55  // Increased from 30 to accommodate larger venues
-  const buildingDepth = 55  // Increased from 30 to accommodate larger venues
+  const buildingWidth = 55
+  const buildingDepth = 55
   
-  // When a floor is selected, make that floor's structure more transparent
-  const getFloorOpacity = (floorIdx: number) => {
+  // Memoize floor opacity calculation
+  const getFloorOpacity = useCallback((floorIdx: number) => {
     if (currentFloor === floorIdx) {
-      return hasSelection ? 0.01 : 0.05  // Much more transparent when viewing
+      return hasSelection ? 0.01 : 0.05
     }
-    return 0.08  // Other floors also more transparent
-  }
+    return 0.08
+  }, [currentFloor, hasSelection])
+  
+  // Memoize window opacity
+  const getWindowOpacity = useCallback((floorIdx: number) => {
+    return floorIdx === currentFloor ? 0.08 : 0.25
+  }, [currentFloor])
   
   return (
     <group>
@@ -480,20 +333,32 @@ function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors
             />
           </mesh>
 
-          {/* Highlight plane for current floor */}
+          {/* Highlight plane for current floor - Enhanced */}
           {i === currentFloor && (
-            <mesh position={[0, i * floorHeight + 0.3, 0]} receiveShadow>
-              <boxGeometry args={[buildingWidth + 2, 0.1, buildingDepth + 2]} />
-              <meshStandardMaterial
-                color="#3b82f6"
-                metalness={0.7}
-                roughness={0.2}
-                emissive="#3b82f6"
-                emissiveIntensity={0.3}
-                transparent
-                opacity={0.15}
-              />
-            </mesh>
+            <>
+              <mesh position={[0, i * floorHeight + 0.3, 0]} receiveShadow>
+                <boxGeometry args={[buildingWidth + 3, 0.15, buildingDepth + 3]} />
+                <meshStandardMaterial
+                  color="#10b981"
+                  metalness={0.8}
+                  roughness={0.2}
+                  emissive="#10b981"
+                  emissiveIntensity={1.2}
+                  transparent
+                  opacity={0.4}
+                />
+              </mesh>
+              
+              {/* Outer glow ring */}
+              <mesh position={[0, i * floorHeight + 0.25, 0]} receiveShadow>
+                <boxGeometry args={[buildingWidth + 4, 0.1, buildingDepth + 4]} />
+                <meshBasicMaterial
+                  color="#10b981"
+                  transparent
+                  opacity={0.3}
+                />
+              </mesh>
+            </>
           )}
           
           {/* Floor edge lines - always visible for structure */}
@@ -504,7 +369,7 @@ function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors
             <lineBasicMaterial color="#64748b" linewidth={2} opacity={0.6} transparent />
           </lineSegments>
           
-          {/* Corner markers with glow */}
+          {/* Corner markers with enhanced glow */}
           {[
             [-buildingWidth/2, buildingDepth/2],
             [buildingWidth/2, buildingDepth/2],
@@ -512,14 +377,14 @@ function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors
             [buildingWidth/2, -buildingDepth/2],
           ].map(([x, z], idx) => (
             <mesh key={idx} position={[x, i * floorHeight, z]}>
-              <sphereGeometry args={[0.3, 8, 8]} />
+              <sphereGeometry args={[0.4, 16, 16]} />
               <meshStandardMaterial 
-                color={i === currentFloor ? '#3b82f6' : '#64748b'} 
-                metalness={0.6} 
-                emissive={i === currentFloor ? '#3b82f6' : '#000000'}
-                emissiveIntensity={i === currentFloor ? 0.5 : 0}
+                color={i === currentFloor ? '#10b981' : '#64748b'} 
+                metalness={0.8} 
+                emissive={i === currentFloor ? '#10b981' : '#000000'}
+                emissiveIntensity={i === currentFloor ? 2.0 : 0}
                 transparent 
-                opacity={0.7} 
+                opacity={i === currentFloor ? 1.0 : 0.6} 
               />
             </mesh>
           ))}
@@ -552,8 +417,8 @@ function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors
 
       {/* Artistic Windows - Full detail when zoomed out, fade when focused */}
       {Array.from({ length: floors }).map((_, floorIdx) => {
-        const isCurrentFloor = floorIdx === currentFloor
-        const windowOpacity = isCurrentFloor ? 0.08 : 0.25  // Much more transparent on current floor
+        const isCurrentFloorWindow = floorIdx === currentFloor
+        const windowOpacity = getWindowOpacity(floorIdx)
         
         return (
           <group key={`windows-${floorIdx}`}>
@@ -570,11 +435,11 @@ function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors
               >
                 <planeGeometry args={[2.2, 2.8]} />
                 <meshStandardMaterial 
-                  color={isCurrentFloor ? '#60a5fa' : '#3b82f6'}
+                  color={isCurrentFloorWindow ? '#60a5fa' : '#3b82f6'}
                   metalness={0.9}
                   roughness={0.1}
-                  emissive={isCurrentFloor ? '#2563eb' : '#1e40af'}
-                  emissiveIntensity={isCurrentFloor ? 0.3 : 0.15}
+                  emissive={isCurrentFloorWindow ? '#2563eb' : '#1e40af'}
+                  emissiveIntensity={isCurrentFloorWindow ? 0.3 : 0.15}
                   transparent
                   opacity={windowOpacity}
                   side={THREE.DoubleSide}
@@ -595,11 +460,11 @@ function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors
               >
                 <planeGeometry args={[2.2, 2.8]} />
                 <meshStandardMaterial 
-                  color={isCurrentFloor ? '#60a5fa' : '#3b82f6'}
+                  color={isCurrentFloorWindow ? '#60a5fa' : '#3b82f6'}
                   metalness={0.9}
                   roughness={0.1}
-                  emissive={isCurrentFloor ? '#2563eb' : '#1e40af'}
-                  emissiveIntensity={isCurrentFloor ? 0.3 : 0.15}
+                  emissive={isCurrentFloorWindow ? '#2563eb' : '#1e40af'}
+                  emissiveIntensity={isCurrentFloorWindow ? 0.3 : 0.15}
                   transparent
                   opacity={windowOpacity}
                   side={THREE.DoubleSide}
@@ -621,11 +486,11 @@ function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors
               >
                 <planeGeometry args={[2.2, 2.8]} />
                 <meshStandardMaterial 
-                  color={isCurrentFloor ? '#60a5fa' : '#3b82f6'}
+                  color={isCurrentFloorWindow ? '#60a5fa' : '#3b82f6'}
                   metalness={0.9}
                   roughness={0.1}
-                  emissive={isCurrentFloor ? '#2563eb' : '#1e40af'}
-                  emissiveIntensity={isCurrentFloor ? 0.3 : 0.15}
+                  emissive={isCurrentFloorWindow ? '#2563eb' : '#1e40af'}
+                  emissiveIntensity={isCurrentFloorWindow ? 0.3 : 0.15}
                   transparent
                   opacity={windowOpacity}
                   side={THREE.DoubleSide}
@@ -647,11 +512,11 @@ function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors
               >
                 <planeGeometry args={[2.2, 2.8]} />
                 <meshStandardMaterial 
-                  color={isCurrentFloor ? '#60a5fa' : '#3b82f6'}
+                  color={isCurrentFloorWindow ? '#60a5fa' : '#3b82f6'}
                   metalness={0.9}
                   roughness={0.1}
-                  emissive={isCurrentFloor ? '#2563eb' : '#1e40af'}
-                  emissiveIntensity={isCurrentFloor ? 0.3 : 0.15}
+                  emissive={isCurrentFloorWindow ? '#2563eb' : '#1e40af'}
+                  emissiveIntensity={isCurrentFloorWindow ? 0.3 : 0.15}
                   transparent
                   opacity={windowOpacity}
                   side={THREE.DoubleSide}
@@ -1034,7 +899,7 @@ function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors
       <gridHelper args={[70, 35, '#334155', '#1e293b']} position={[0, 0.01, 0]} />
     </group>
   )
-}
+})
 
 export default function Building3D({
   venues,
@@ -1049,7 +914,30 @@ export default function Building3D({
   const [cameraTarget, setCameraTarget] = useState<[number, number, number]>([30, 25, 30])
   const [isZoomed, setIsZoomed] = useState(false)
   const [animating, setAnimating] = useState(false)
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const mouseMoveThrottleRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Track mouse position for tooltip with throttling for performance
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      // Throttle mouse position updates to every 16ms (60fps)
+      if (mouseMoveThrottleRef.current) return
+      
+      mouseMoveThrottleRef.current = setTimeout(() => {
+        setMousePosition({ x: e.clientX, y: e.clientY })
+        mouseMoveThrottleRef.current = null
+      }, 16)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      if (mouseMoveThrottleRef.current) {
+        clearTimeout(mouseMoveThrottleRef.current)
+      }
+    }
+  }, [])
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -1162,6 +1050,30 @@ export default function Building3D({
     [hoveredVenueData, activities]
   )
 
+  // Calculate tooltip position - smart positioning based on mouse location (Memoized)
+  const tooltipPosition = useMemo(() => {
+    if (!hoveredVenueData) return { left: 0, top: 0 }
+    
+    const tooltipWidth = 280
+    const tooltipHeight = 200
+    const padding = 20
+    const { x, y } = mousePosition
+
+    const screenWidth = window.innerWidth
+    const screenHeight = window.innerHeight
+    
+    const isRight = x > screenWidth / 2
+    const isBottom = y > screenHeight / 2
+
+    let left = isRight ? x - tooltipWidth - padding : x + padding
+    let top = isBottom ? y - tooltipHeight - padding : y + padding
+
+    left = Math.max(padding, Math.min(left, screenWidth - tooltipWidth - padding))
+    top = Math.max(padding, Math.min(top, screenHeight - tooltipHeight - padding))
+
+    return { left, top }
+  }, [hoveredVenueData, mousePosition])
+
   return (
     <>
       <Canvas
@@ -1173,13 +1085,16 @@ export default function Building3D({
         }}
         gl={{ 
           antialias: true,
-          alpha: true,
+          alpha: false,
           powerPreference: "high-performance",
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.2
+          toneMappingExposure: 1.2,
+          logarithmicDepthBuffer: true,
         }}
         shadows="soft"
         dpr={[1, 2]}
+        frameloop="demand" // Only render when needed
+        performance={{ min: 0.5 }} // Adaptive performance
       >
         {/* Camera animation */}
         <CameraController target={cameraTarget} enabled={animating} />
@@ -1195,13 +1110,13 @@ export default function Building3D({
           minPolarAngle={0.1}
         />
         
-        {/* Lighting - Simplified for mobile */}
-        <ambientLight intensity={0.5} />
+        {/* Lighting - Enhanced for better color visibility */}
+        <ambientLight intensity={0.6} />
         
-        {/* Main sun light */}
+        {/* Main sun light - Brighter */}
         <directionalLight
           position={[40, 60, 40]}
-          intensity={1.5}
+          intensity={2.0}
           castShadow
           shadow-mapSize-width={4096}
           shadow-mapSize-height={4096}
@@ -1214,42 +1129,54 @@ export default function Building3D({
           shadow-bias={-0.0001}
         />
         
-        {/* Fill lights - Reduced on mobile */}
-        <directionalLight position={[-40, 40, -40]} intensity={0.6} />
-        <directionalLight position={[0, 30, -50]} intensity={0.4} />
+        {/* Fill lights - Enhanced */}
+        <directionalLight position={[-40, 40, -40]} intensity={0.8} color="#60a5fa" />
+        <directionalLight position={[0, 30, -50]} intensity={0.6} color="#a78bfa" />
       
-        {/* Hemisphere light for natural sky/ground lighting */}
+        {/* Hemisphere light for natural sky/ground lighting - Enhanced */}
         <hemisphereLight 
-          intensity={0.4} 
+          intensity={0.6} 
           color="#87CEEB" 
-          groundColor="#2c3e50" 
+          groundColor="#10b981" 
         />
         
-        {/* Spot light for dramatic effect - Desktop only */}
+        {/* Spot light for dramatic effect - Brighter */}
         <spotLight
-          position={[0, 70, 0]}
-          angle={0.6}
-          penumbra={0.5}
-          intensity={0.5}
+          position={[0, 80, 0]}
+          angle={0.5}
+          penumbra={0.4}
+          intensity={1.0}
+          color="#ffffff"
           castShadow
         />
         
+        {/* Additional colored accent lights */}
+        <pointLight position={[30, 20, 30]} intensity={0.8} color="#10b981" distance={60} />
+        <pointLight position={[-30, 20, -30]} intensity={0.8} color="#3b82f6" distance={60} />
+        
         {/* Environment map for realistic reflections */}
-        <Environment preset="city" background={false} blur={0.8}>
-          {/* Custom light formers for accent lighting */}
+        <Environment preset="city" background={false} blur={0.6}>
+          {/* Custom light formers for accent lighting - Enhanced */}
           <Lightformer
             position={[10, 10, 10]}
-            intensity={0.5}
-            width={10}
-            height={10}
+            intensity={1.0}
+            width={15}
+            height={15}
             color="#60a5fa"
           />
           <Lightformer
             position={[-10, 10, -10]}
-            intensity={0.3}
-            width={10}
-            height={10}
+            intensity={0.8}
+            width={15}
+            height={15}
             color="#a78bfa"
+          />
+          <Lightformer
+            position={[0, 15, 0]}
+            intensity={0.6}
+            width={20}
+            height={20}
+            color="#10b981"
           />
         </Environment>
         
@@ -1292,46 +1219,58 @@ export default function Building3D({
 
       {/* Hover Tooltip */}
       {hoveredVenueData && !programFlowVenue && (
-        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-40 max-w-md w-full px-4">
-          <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 backdrop-blur-xl border-2 border-blue-500/50 rounded-xl p-4 shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div className="flex-1">
-                <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                  <div 
-                    className="w-3 h-3 rounded-full animate-pulse flex-shrink-0" 
-                    style={{ backgroundColor: hoveredVenueData.color }}
-                  />
-                  <span>{hoveredVenueData.name}</span>
-                </h3>
-                <p className="text-slate-400 text-sm mt-1">
-                  Floor {hoveredVenueData.floor + 1}
+        <div 
+          className="fixed z-40 pointer-events-none"
+          style={{
+            left: `${tooltipPosition.left}px`,
+            top: `${tooltipPosition.top}px`,
+          }}
+        >
+          <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 backdrop-blur-xl border-2 border-blue-500/50 rounded-lg shadow-2xl animate-in fade-in zoom-in duration-200 w-64 sm:w-72">
+            <div className="p-3 sm:p-4">
+              {/* Header */}
+              <div className="flex items-start gap-2 mb-2">
+                <div 
+                  className="w-2 h-2 sm:w-3 sm:h-3 rounded-full animate-pulse flex-shrink-0 mt-1" 
+                  style={{ backgroundColor: hoveredVenueData.color }}
+                />
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-white font-bold text-sm sm:text-base leading-tight break-words">
+                    {hoveredVenueData.name}
+                  </h3>
+                  <p className="text-slate-400 text-xs mt-0.5">
+                    Floor {hoveredVenueData.floor + 1}
+                  </p>
+                </div>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <div className="bg-blue-600/20 rounded-md p-2 border border-blue-500/30">
+                  <div className="text-blue-300 text-[10px] sm:text-xs">Capacity</div>
+                  <div className="text-white font-bold text-base sm:text-lg">{hoveredVenueData.capacity}</div>
+                </div>
+                <div className="bg-purple-600/20 rounded-md p-2 border border-purple-500/30">
+                  <div className="text-purple-300 text-[10px] sm:text-xs">Activities</div>
+                  <div className="text-white font-bold text-base sm:text-lg">{hoveredVenueActivities.length}</div>
+                </div>
+              </div>
+
+              {/* Next Activity */}
+              {hoveredVenueActivities.length > 0 && (
+                <div className="bg-green-600/20 rounded-md p-2 border border-green-500/30 mb-2">
+                  <div className="text-green-300 text-[10px] sm:text-xs font-semibold mb-1">Next Activity:</div>
+                  <div className="text-white text-xs sm:text-sm font-semibold line-clamp-1">{hoveredVenueActivities[0].title}</div>
+                  <div className="text-slate-300 text-[10px] sm:text-xs mt-0.5 line-clamp-1">{hoveredVenueActivities[0].speaker}</div>
+                </div>
+              )}
+
+              {/* Action Hint */}
+              <div className="text-center pt-2 border-t border-slate-700">
+                <p className="text-slate-400 text-[10px] sm:text-xs">
+                  👆 Click to view full schedule
                 </p>
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div className="bg-blue-600/20 rounded-lg p-3 border border-blue-500/30">
-                <div className="text-blue-300 text-xs mb-1">Capacity</div>
-                <div className="text-white font-bold text-xl">{hoveredVenueData.capacity}</div>
-              </div>
-              <div className="bg-purple-600/20 rounded-lg p-3 border border-purple-500/30">
-                <div className="text-purple-300 text-xs mb-1">Activities</div>
-                <div className="text-white font-bold text-xl">{hoveredVenueActivities.length}</div>
-              </div>
-            </div>
-
-            {hoveredVenueActivities.length > 0 && (
-              <div className="bg-green-600/20 rounded-lg p-3 border border-green-500/30 mb-3">
-                <div className="text-green-300 text-xs font-semibold mb-2">Next Activity:</div>
-                <div className="text-white text-sm font-semibold">{hoveredVenueActivities[0].title}</div>
-                <div className="text-slate-300 text-xs mt-1">{hoveredVenueActivities[0].speaker}</div>
-              </div>
-            )}
-
-            <div className="text-center pt-3 border-t border-slate-700">
-              <p className="text-slate-400 text-xs">
-                👆 Click to view full schedule
-              </p>
             </div>
           </div>
         </div>
