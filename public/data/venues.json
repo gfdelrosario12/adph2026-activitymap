@@ -1,0 +1,62 @@
+[
+  {
+    "id": "venue-1",
+    "name": "Main Auditorium",
+    "floor": "floor-1",
+    "position": { "x": 0, "y": 0, "z": 0 },
+    "size": { "width": 20, "height": 15, "depth": 25 },
+    "capacity": 500,
+    "description": "Large auditorium for keynote presentations",
+    "color": "#3B82F6"
+  },
+  {
+    "id": "venue-2",
+    "name": "Workshop Room A",
+    "floor": "floor-2",
+    "position": { "x": -8, "y": 5, "z": -5 },
+    "size": { "width": 8, "height": 4, "depth": 10 },
+    "capacity": 30,
+    "description": "Beginner-friendly Arduino projects",
+    "color": "#8B5CF6"
+  },
+  {
+    "id": "venue-3",
+    "name": "Workshop Room B",
+    "floor": "floor-2",
+    "position": { "x": 8, "y": 5, "z": -5 },
+    "size": { "width": 8, "height": 4, "depth": 10 },
+    "capacity": 30,
+    "description": "Intermediate IoT projects",
+    "color": "#A78BFA"
+  },
+  {
+    "id": "venue-4",
+    "name": "Innovation Lab",
+    "floor": "floor-3",
+    "position": { "x": 0, "y": 10, "z": -10 },
+    "size": { "width": 15, "height": 4, "depth": 15 },
+    "capacity": 50,
+    "description": "Advanced projects and robotics demonstrations",
+    "color": "#EC4899"
+  },
+  {
+    "id": "venue-5",
+    "name": "Networking Lounge",
+    "floor": "floor-1",
+    "position": { "x": -10, "y": 0, "z": 10 },
+    "size": { "width": 12, "height": 3.5, "depth": 10 },
+    "capacity": 100,
+    "description": "Casual area for networking and refreshments",
+    "color": "#60A5FA"
+  },
+  {
+    "id": "venue-6",
+    "name": "Exhibition Center",
+    "floor": "floor-1",
+    "position": { "x": 12, "y": 0, "z": 5 },
+    "size": { "width": 10, "height": 3.5, "depth": 15 },
+    "capacity": 200,
+    "description": "Product showcases and vendor booths",
+    "color": "#1E40AF"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "floor-0",
+    "name": "Ground Floor",
+    "level": 0
+  },
+  {
+    "id": "floor-1",
+    "name": "Floor 2",
+    "level": 1
+  },
+  {
+    "id": "floor-2",
+    "name": "Floor 3",
+    "level": 2
+  },
+  {
+    "id": "floor-3",
+    "name": "Floor 4",
+    "level": 3
+  },
+  {
+    "id": "floor-4",
+    "name": "Floor 5",
+    "level": 4
+  },
+  {
+    "id": "floor-5",
+    "name": "Floor 6",
+    "level": 5
+  },
+  {
+    "id": "floor-6",
+    "name": "Floor 7",
+    "level": 6
+  },
+  {
+    "id": "floor-7",
+    "name": "Floor 8",
+    "level": 7
+  },
+  {
+    "id": "floor-8",
+    "name": "Floor 9",
+    "level": 8
+  },
+  {
+    "id": "floor-9",
+    "name": "Floor 10",
+    "level": 9
+  },
+  {
+    "id": "floor-10",
+    "name": "Floor 11",
+    "level": 10
+  },
+  {
+    "id": "floor-11",
+    "name": "Top Floor",
+    "level": 11
+  }
+]

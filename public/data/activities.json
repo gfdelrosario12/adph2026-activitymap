@@ -1,0 +1,98 @@
+[
+  {
+    "id": "activity-1",
+    "title": "Opening Keynote",
+    "venue": "venue-1",
+    "startTime": "09:00",
+    "endTime": "10:00",
+    "speaker": "Massimo Banzi",
+    "description": "Founder of Arduino discusses the future of open-source hardware",
+    "category": "keynote",
+    "capacity": 500,
+    "registered": 420
+  },
+  {
+    "id": "activity-2",
+    "title": "Getting Started with Arduino",
+    "venue": "venue-2",
+    "startTime": "10:30",
+    "endTime": "12:00",
+    "speaker": "Sarah Johnson",
+    "description": "Perfect for beginners - learn Arduino basics in 90 minutes",
+    "category": "workshop",
+    "capacity": 30,
+    "registered": 28
+  },
+  {
+    "id": "activity-3",
+    "title": "IoT with Arduino and Cloud Services",
+    "venue": "venue-3",
+    "startTime": "10:30",
+    "endTime": "12:00",
+    "speaker": "Dr. Chen Wei",
+    "description": "Connect Arduino to cloud platforms and build smart devices",
+    "category": "workshop",
+    "capacity": 30,
+    "registered": 25
+  },
+  {
+    "id": "activity-4",
+    "title": "Robotics & Motion Control",
+    "venue": "venue-4",
+    "startTime": "14:00",
+    "endTime": "16:00",
+    "speaker": "Alex Rodriguez",
+    "description": "Advanced techniques for building autonomous robots with Arduino",
+    "category": "workshop",
+    "capacity": 50,
+    "registered": 42
+  },
+  {
+    "id": "activity-5",
+    "title": "Hardware Hacking: From Idea to Prototype",
+    "venue": "venue-2",
+    "startTime": "13:00",
+    "endTime": "14:30",
+    "speaker": "Emma Liu",
+    "description": "Rapid prototyping techniques and best practices",
+    "category": "workshop",
+    "capacity": 30,
+    "registered": 29
+  },
+  {
+    "id": "activity-6",
+    "title": "Arduino in Space: Real-World Applications",
+    "venue": "venue-1",
+    "startTime": "11:30",
+    "endTime": "12:30",
+    "speaker": "Dr. James Park",
+    "description": "How Arduino is used in space exploration and research",
+    "category": "keynote",
+    "capacity": 500,
+    "registered": 385
+  },
+  {
+    "id": "activity-7",
+    "title": "Interactive Q&A Session",
+    "venue": "venue-5",
+    "startTime": "16:30",
+    "endTime": "17:30",
+    "speaker": "Industry Experts Panel",
+    "description": "Ask questions to leading Arduino experts and community members",
+    "category": "panel",
+    "capacity": 100,
+    "registered": 87
+  },
+  {
+    "id": "activity-8",
+    "title": "Closing Ceremony & Awards",
+    "venue": "venue-1",
+    "startTime": "17:45",
+    "endTime": "18:30",
+    "speaker": "Arduino Community",
+    "description": "Celebrate the best projects and innovations from Arduino Day",
+    "category": "keynote",
+    "capacity": 500,
+    "registered": 420
+  }
+]

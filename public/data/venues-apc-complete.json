@@ -1,0 +1,902 @@
+[
+  {
+    "id": "floor1-canteen",
+    "name": "Canteen Area",
+    "floor": 0,
+    "position": { "x": -18, "y": 0.5, "z": 0 },
+    "size": { "width": 25, "height": 3.5, "depth": 25 },
+    "capacity": 200,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor1-mph1",
+    "name": "MPH-1 (RM 115)",
+    "floor": 0,
+    "position": { "x": 12, "y": 0.5, "z": 0 },
+    "size": { "width": 20, "height": 3.5, "depth": 15 },
+    "capacity": 150,
+    "color": "#22c55e",
+    "type": "event"
+  },
+  {
+    "id": "floor1-admission",
+    "name": "Admission (RM 111)",
+    "floor": 0,
+    "position": { "x": 0, "y": 0.5, "z": -10 },
+    "size": { "width": 8, "height": 3, "depth": 8 },
+    "capacity": 20,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor1-prayer",
+    "name": "Prayer Room (RM 113)",
+    "floor": 0,
+    "position": { "x": 0, "y": 0.5, "z": 10 },
+    "size": { "width": 8, "height": 3, "depth": 8 },
+    "capacity": 30,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor1-clinic",
+    "name": "Clinic (RM 114)",
+    "floor": 0,
+    "position": { "x": 8, "y": 0.5, "z": 10 },
+    "size": { "width": 8, "height": 3, "depth": 8 },
+    "capacity": 15,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor2-rm201",
+    "name": "RM 201",
+    "floor": 1,
+    "position": { "x": -20, "y": 4.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor2-rm203",
+    "name": "RM 203",
+    "floor": 1,
+    "position": { "x": -10, "y": 4.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor2-rm205",
+    "name": "RM 205",
+    "floor": 1,
+    "position": { "x": 0, "y": 4.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor2-rm207",
+    "name": "RM 207",
+    "floor": 1,
+    "position": { "x": 10, "y": 4.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor2-rm215",
+    "name": "RM 215",
+    "floor": 1,
+    "position": { "x": 20, "y": 4.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor2-rm217",
+    "name": "RM 217",
+    "floor": 1,
+    "position": { "x": 25, "y": 4.5, "z": -10 },
+    "size": { "width": 8, "height": 3, "depth": 10 },
+    "capacity": 30,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor2-mph2",
+    "name": "MPH-2",
+    "floor": 1,
+    "position": { "x": -25, "y": 4.5, "z": 0 },
+    "size": { "width": 15, "height": 3.5, "depth": 12 },
+    "capacity": 100,
+    "color": "#22c55e",
+    "type": "event"
+  },
+  {
+    "id": "floor2-lecture213",
+    "name": "Lecture Room 213",
+    "floor": 1,
+    "position": { "x": -10, "y": 4.5, "z": 0 },
+    "size": { "width": 12, "height": 3, "depth": 10 },
+    "capacity": 50,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor2-paloalto",
+    "name": "Palo Alto (RM 202)",
+    "floor": 1,
+    "position": { "x": -20, "y": 4.5, "z": 10 },
+    "size": { "width": 12, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor2-comlab204",
+    "name": "Com Lab 204",
+    "floor": 1,
+    "position": { "x": -8, "y": 4.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor2-comlab208",
+    "name": "Com Lab 208",
+    "floor": 1,
+    "position": { "x": 2, "y": 4.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor2-comlab216",
+    "name": "Com Lab 216",
+    "floor": 1,
+    "position": { "x": 12, "y": 4.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor2-microsoft218",
+    "name": "Microsoft Office 218",
+    "floor": 1,
+    "position": { "x": 22, "y": 4.5, "z": 10 },
+    "size": { "width": 12, "height": 3, "depth": 10 },
+    "capacity": 45,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor3-rm301",
+    "name": "Classroom 301",
+    "floor": 2,
+    "position": { "x": -20, "y": 8.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor3-rm303",
+    "name": "Classroom 303",
+    "floor": 2,
+    "position": { "x": -10, "y": 8.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor3-rm305",
+    "name": "Classroom 305",
+    "floor": 2,
+    "position": { "x": 0, "y": 8.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor3-rm307",
+    "name": "Classroom 307",
+    "floor": 2,
+    "position": { "x": 10, "y": 8.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor3-rm315",
+    "name": "Classroom 315",
+    "floor": 2,
+    "position": { "x": 20, "y": 8.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor3-rm317",
+    "name": "Classroom 317",
+    "floor": 2,
+    "position": { "x": 25, "y": 8.5, "z": -10 },
+    "size": { "width": 8, "height": 3, "depth": 10 },
+    "capacity": 30,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor3-lab302",
+    "name": "Lab 302",
+    "floor": 2,
+    "position": { "x": -20, "y": 8.5, "z": 10 },
+    "size": { "width": 12, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor3-lab304",
+    "name": "Lab 304",
+    "floor": 2,
+    "position": { "x": -8, "y": 8.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor3-lab308",
+    "name": "Lab 308",
+    "floor": 2,
+    "position": { "x": 2, "y": 8.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor3-lab316",
+    "name": "Lab 316",
+    "floor": 2,
+    "position": { "x": 12, "y": 8.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor4-president",
+    "name": "President Office",
+    "floor": 3,
+    "position": { "x": -22, "y": 12.5, "z": -10 },
+    "size": { "width": 12, "height": 3, "depth": 10 },
+    "capacity": 15,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor4-boardroom",
+    "name": "Board Room 407",
+    "floor": 3,
+    "position": { "x": -8, "y": 12.5, "z": -10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 25,
+    "color": "#22c55e",
+    "type": "event"
+  },
+  {
+    "id": "floor4-accounting",
+    "name": "Accounting",
+    "floor": 3,
+    "position": { "x": 6, "y": 12.5, "z": -10 },
+    "size": { "width": 12, "height": 3, "depth": 10 },
+    "capacity": 30,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor4-registrar",
+    "name": "Registrar",
+    "floor": 3,
+    "position": { "x": 20, "y": 12.5, "z": -10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor4-faculty",
+    "name": "Main Faculty Area",
+    "floor": 3,
+    "position": { "x": -10, "y": 12.5, "z": 10 },
+    "size": { "width": 20, "height": 3, "depth": 12 },
+    "capacity": 80,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor4-openlab",
+    "name": "Open Lab 414",
+    "floor": 3,
+    "position": { "x": 15, "y": 12.5, "z": 10 },
+    "size": { "width": 18, "height": 3, "depth": 12 },
+    "capacity": 50,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor5-rm501",
+    "name": "Classroom 501",
+    "floor": 4,
+    "position": { "x": -22, "y": 16.5, "z": -10 },
+    "size": { "width": 12, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor5-rm507",
+    "name": "Classroom 507",
+    "floor": 4,
+    "position": { "x": -8, "y": 16.5, "z": -10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor5-rm513",
+    "name": "Classroom 513",
+    "floor": 4,
+    "position": { "x": 6, "y": 16.5, "z": -10 },
+    "size": { "width": 12, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor5-rm517",
+    "name": "Classroom 517",
+    "floor": 4,
+    "position": { "x": 20, "y": 16.5, "z": -10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor5-lab502",
+    "name": "Lab 502",
+    "floor": 4,
+    "position": { "x": -10, "y": 16.5, "z": 10 },
+    "size": { "width": 20, "height": 3, "depth": 12 },
+    "capacity": 50,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor5-lab514",
+    "name": "Lab 514",
+    "floor": 4,
+    "position": { "x": 15, "y": 16.5, "z": 10 },
+    "size": { "width": 18, "height": 3, "depth": 12 },
+    "capacity": 45,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor6-rm601",
+    "name": "RM 601",
+    "floor": 5,
+    "position": { "x": -24, "y": 20.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor6-rm603",
+    "name": "RM 603",
+    "floor": 5,
+    "position": { "x": -14, "y": 20.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor6-rm605",
+    "name": "RM 605",
+    "floor": 5,
+    "position": { "x": -4, "y": 20.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor6-rm607",
+    "name": "RM 607",
+    "floor": 5,
+    "position": { "x": 6, "y": 20.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor6-rm609a",
+    "name": "Small Classroom 609A",
+    "floor": 5,
+    "position": { "x": 16, "y": 20.5, "z": -12 },
+    "size": { "width": 7, "height": 3, "depth": 7 },
+    "capacity": 20,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor6-rm609b",
+    "name": "Small Classroom 609B",
+    "floor": 5,
+    "position": { "x": 16, "y": 20.5, "z": -5 },
+    "size": { "width": 7, "height": 3, "depth": 7 },
+    "capacity": 20,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor6-rm609c",
+    "name": "Small Classroom 609C",
+    "floor": 5,
+    "position": { "x": 23, "y": 20.5, "z": -8 },
+    "size": { "width": 7, "height": 3, "depth": 7 },
+    "capacity": 20,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor6-psych613",
+    "name": "Psychology 613",
+    "floor": 5,
+    "position": { "x": 26, "y": 20.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor6-comlab602",
+    "name": "Com Lab 602",
+    "floor": 5,
+    "position": { "x": -24, "y": 20.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor6-comlab604",
+    "name": "Com Lab 604",
+    "floor": 5,
+    "position": { "x": -14, "y": 20.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor6-comlab606",
+    "name": "Com Lab 606",
+    "floor": 5,
+    "position": { "x": -4, "y": 20.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor6-comlab608",
+    "name": "Com Lab 608",
+    "floor": 5,
+    "position": { "x": 6, "y": 20.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor6-rm614",
+    "name": "RM 614",
+    "floor": 5,
+    "position": { "x": 16, "y": 20.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor6-rm616",
+    "name": "RM 616",
+    "floor": 5,
+    "position": { "x": 26, "y": 20.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor7-rm701",
+    "name": "Classroom 701",
+    "floor": 6,
+    "position": { "x": -24, "y": 24.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor7-rm703",
+    "name": "Classroom 703",
+    "floor": 6,
+    "position": { "x": -14, "y": 24.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor7-rm705",
+    "name": "Classroom 705",
+    "floor": 6,
+    "position": { "x": -4, "y": 24.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor7-rm707",
+    "name": "Classroom 707",
+    "floor": 6,
+    "position": { "x": 6, "y": 24.5, "z": -10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor7-rm717",
+    "name": "Classroom 717",
+    "floor": 6,
+    "position": { "x": 20, "y": 24.5, "z": -10 },
+    "size": { "width": 12, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor7-lab702",
+    "name": "Lab 702",
+    "floor": 6,
+    "position": { "x": -24, "y": 24.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor7-lab704",
+    "name": "Lab 704",
+    "floor": 6,
+    "position": { "x": -14, "y": 24.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor7-lab706",
+    "name": "Lab 706",
+    "floor": 6,
+    "position": { "x": -4, "y": 24.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor7-lab708",
+    "name": "Lab 708",
+    "floor": 6,
+    "position": { "x": 6, "y": 24.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor7-lab716",
+    "name": "Lab 716",
+    "floor": 6,
+    "position": { "x": 20, "y": 24.5, "z": 10 },
+    "size": { "width": 12, "height": 3, "depth": 10 },
+    "capacity": 45,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor8-digital801",
+    "name": "Digital Electronics 801",
+    "floor": 7,
+    "position": { "x": -22, "y": 28.5, "z": -10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor8-electronics805",
+    "name": "Electronics Lab 805",
+    "floor": 7,
+    "position": { "x": -6, "y": 28.5, "z": -10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor8-networking807",
+    "name": "Networking Lab 807",
+    "floor": 7,
+    "position": { "x": 10, "y": 28.5, "z": -10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor8-nilab802",
+    "name": "NI Lab 802",
+    "floor": 7,
+    "position": { "x": -22, "y": 28.5, "z": 10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor8-physics806",
+    "name": "Physics Lab 806",
+    "floor": 7,
+    "position": { "x": -6, "y": 28.5, "z": 10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor8-airhub808",
+    "name": "AIR Hub 808",
+    "floor": 7,
+    "position": { "x": 10, "y": 28.5, "z": 10 },
+    "size": { "width": 16, "height": 3.5, "depth": 12 },
+    "capacity": 60,
+    "color": "#22c55e",
+    "type": "event"
+  },
+  {
+    "id": "floor8-hydraulic816",
+    "name": "Hydraulic Lab 816",
+    "floor": 7,
+    "position": { "x": 26, "y": 28.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 30,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor9-lab901",
+    "name": "Lab 901",
+    "floor": 8,
+    "position": { "x": -22, "y": 32.5, "z": -10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor9-lab905",
+    "name": "Lab 905",
+    "floor": 8,
+    "position": { "x": -6, "y": 32.5, "z": -10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor9-lab907",
+    "name": "Lab 907",
+    "floor": 8,
+    "position": { "x": 10, "y": 32.5, "z": -10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor9-lab902",
+    "name": "Lab 902",
+    "floor": 8,
+    "position": { "x": -22, "y": 32.5, "z": 10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor9-lab906",
+    "name": "Lab 906",
+    "floor": 8,
+    "position": { "x": -6, "y": 32.5, "z": 10 },
+    "size": { "width": 14, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#10b981",
+    "type": "lab"
+  },
+  {
+    "id": "floor9-rm908",
+    "name": "Classroom 908",
+    "floor": 8,
+    "position": { "x": 10, "y": 32.5, "z": 10 },
+    "size": { "width": 16, "height": 3, "depth": 12 },
+    "capacity": 45,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor10-gym",
+    "name": "Gym",
+    "floor": 9,
+    "position": { "x": -18, "y": 36.5, "z": 0 },
+    "size": { "width": 15, "height": 4, "depth": 25 },
+    "capacity": 100,
+    "color": "#22c55e",
+    "type": "event"
+  },
+  {
+    "id": "floor10-tabletennis",
+    "name": "Table Tennis Zone",
+    "floor": 9,
+    "position": { "x": -2, "y": 36.5, "z": 0 },
+    "size": { "width": 12, "height": 3.5, "depth": 15 },
+    "capacity": 40,
+    "color": "#22c55e",
+    "type": "event"
+  },
+  {
+    "id": "floor10-shower1006",
+    "name": "Men's Shower 1006",
+    "floor": 9,
+    "position": { "x": 12, "y": 36.5, "z": 10 },
+    "size": { "width": 8, "height": 3, "depth": 8 },
+    "capacity": 20,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor10-rm1014",
+    "name": "Classroom 1014",
+    "floor": 9,
+    "position": { "x": 20, "y": 36.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor10-rm1016",
+    "name": "Classroom 1016",
+    "floor": 9,
+    "position": { "x": 28, "y": 36.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor10-rm1018",
+    "name": "Classroom 1018",
+    "floor": 9,
+    "position": { "x": 20, "y": 36.5, "z": -10 },
+    "size": { "width": 12, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor11-rm1101",
+    "name": "Classroom 1101",
+    "floor": 10,
+    "position": { "x": -18, "y": 40.5, "z": 0 },
+    "size": { "width": 15, "height": 3, "depth": 25 },
+    "capacity": 50,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor11-rm1113",
+    "name": "Classroom 1113",
+    "floor": 10,
+    "position": { "x": -2, "y": 40.5, "z": 0 },
+    "size": { "width": 12, "height": 3, "depth": 15 },
+    "capacity": 40,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor11-rm1114",
+    "name": "Classroom 1114",
+    "floor": 10,
+    "position": { "x": 20, "y": 40.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor11-rm1116",
+    "name": "Classroom 1116",
+    "floor": 10,
+    "position": { "x": 28, "y": 40.5, "z": 10 },
+    "size": { "width": 10, "height": 3, "depth": 10 },
+    "capacity": 35,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor11-rm1118",
+    "name": "Classroom 1118",
+    "floor": 10,
+    "position": { "x": 20, "y": 40.5, "z": -10 },
+    "size": { "width": 12, "height": 3, "depth": 10 },
+    "capacity": 40,
+    "color": "#059669",
+    "type": "classroom"
+  },
+  {
+    "id": "floor12-basketball",
+    "name": "Basketball Court",
+    "floor": 11,
+    "position": { "x": -15, "y": 44.5, "z": 0 },
+    "size": { "width": 30, "height": 7, "depth": 28 },
+    "capacity": 300,
+    "color": "#22c55e",
+    "type": "event"
+  },
+  {
+    "id": "floor12-auditorium",
+    "name": "Main Auditorium",
+    "floor": 11,
+    "position": { "x": 15, "y": 44.5, "z": 0 },
+    "size": { "width": 25, "height": 6, "depth": 25 },
+    "capacity": 250,
+    "color": "#059669",
+    "type": "classroom"
+  }
+]
