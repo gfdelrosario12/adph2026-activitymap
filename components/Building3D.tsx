@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useRef, useMemo } from 'react'
+import React, { useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, Environment, Lightformer } from '@react-three/drei'
 import * as THREE from 'three'
 import { Venue } from '@/lib/types'
 
@@ -648,6 +648,101 @@ function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors
         )
       })}
 
+      {/* Balconies on specific floors (every 3rd floor) */}
+      {Array.from({ length: floors }).map((_, floorIdx) => {
+        if (floorIdx % 3 === 2 && floorIdx > 0) {
+          return (
+            <group key={`balcony-${floorIdx}`}>
+              {/* Front balcony */}
+              <mesh 
+                position={[0, floorIdx * floorHeight + floorHeight/2, -buildingDepth/2 - 0.8]}
+                castShadow
+                receiveShadow
+              >
+                <boxGeometry args={[buildingWidth * 0.8, 0.15, 1.5]} />
+                <meshStandardMaterial 
+                  color="#475569" 
+                  metalness={0.4} 
+                  roughness={0.6}
+                />
+              </mesh>
+              
+              {/* Balcony railing */}
+              <mesh 
+                position={[0, floorIdx * floorHeight + floorHeight/2 + 0.5, -buildingDepth/2 - 1.5]}
+              >
+                <boxGeometry args={[buildingWidth * 0.8, 1, 0.05]} />
+                <meshStandardMaterial 
+                  color="#94a3b8" 
+                  metalness={0.7} 
+                  roughness={0.3}
+                  transparent
+                  opacity={0.8}
+                />
+              </mesh>
+            </group>
+          )
+        }
+        return null
+      })}
+
+      {/* Horizontal bands/accents every 4 floors */}
+      {Array.from({ length: floors }).map((_, floorIdx) => {
+        if (floorIdx % 4 === 0 && floorIdx > 0) {
+          return (
+            <group key={`accent-${floorIdx}`}>
+              {/* Front accent band */}
+              <mesh position={[0, floorIdx * floorHeight, -buildingDepth/2 - 0.05]}>
+                <planeGeometry args={[buildingWidth + 2, 0.5]} />
+                <meshStandardMaterial 
+                  color="#10b981" 
+                  emissive="#10b981"
+                  emissiveIntensity={0.4}
+                  metalness={0.6}
+                  roughness={0.4}
+                />
+              </mesh>
+              
+              {/* Back accent band */}
+              <mesh position={[0, floorIdx * floorHeight, buildingDepth/2 + 0.05]} rotation={[0, Math.PI, 0]}>
+                <planeGeometry args={[buildingWidth + 2, 0.5]} />
+                <meshStandardMaterial 
+                  color="#10b981" 
+                  emissive="#10b981"
+                  emissiveIntensity={0.4}
+                  metalness={0.6}
+                  roughness={0.4}
+                />
+              </mesh>
+            </group>
+          )
+        }
+        return null
+      })}
+
+      {/* Corner vertical accent strips */}
+      {[
+        [-buildingWidth/2 - 0.1, 0, -buildingDepth/2],
+        [buildingWidth/2 + 0.1, 0, -buildingDepth/2],
+        [-buildingWidth/2 - 0.1, 0, buildingDepth/2],
+        [buildingWidth/2 + 0.1, 0, buildingDepth/2],
+      ].map((pos, i) => (
+        <mesh 
+          key={`corner-accent-${i}`}
+          position={[pos[0], (floors * floorHeight) / 2, pos[2]]}
+          castShadow
+        >
+          <boxGeometry args={[0.4, floors * floorHeight, 0.4]} />
+          <meshStandardMaterial 
+            color="#3b82f6" 
+            emissive="#2563eb"
+            emissiveIntensity={0.3}
+            metalness={0.7} 
+            roughness={0.3}
+          />
+        </mesh>
+      ))}
+
       {/* Roof with architectural details */}
       <mesh position={[0, floors * floorHeight, 0]} castShadow>
         <boxGeometry args={[buildingWidth + 1, 0.4, buildingDepth + 1]} />
@@ -670,11 +765,217 @@ function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors
         />
       </mesh>
 
+      {/* Penthouse - Modern glass structure on top */}
+      <group position={[0, floors * floorHeight + 2, 0]}>
+        {/* Penthouse base */}
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[buildingWidth * 0.6, 3, buildingDepth * 0.6]} />
+          <meshStandardMaterial 
+            color="#2d3748" 
+            metalness={0.4} 
+            roughness={0.6}
+            transparent
+            opacity={0.9}
+          />
+        </mesh>
+        
+        {/* Penthouse glass panels */}
+        <mesh position={[0, 0, buildingDepth * 0.3 + 0.1]}>
+          <planeGeometry args={[buildingWidth * 0.6, 3]} />
+          <meshStandardMaterial 
+            color="#60a5fa" 
+            metalness={0.9} 
+            roughness={0.1}
+            transparent
+            opacity={0.4}
+            emissive="#3b82f6"
+            emissiveIntensity={0.2}
+          />
+        </mesh>
+        
+        <mesh position={[0, 0, -buildingDepth * 0.3 - 0.1]} rotation={[0, Math.PI, 0]}>
+          <planeGeometry args={[buildingWidth * 0.6, 3]} />
+          <meshStandardMaterial 
+            color="#60a5fa" 
+            metalness={0.9} 
+            roughness={0.1}
+            transparent
+            opacity={0.4}
+            emissive="#3b82f6"
+            emissiveIntensity={0.2}
+          />
+        </mesh>
+        
+        {/* Penthouse roof */}
+        <mesh position={[0, 1.7, 0]} castShadow>
+          <boxGeometry args={[buildingWidth * 0.65, 0.3, buildingDepth * 0.65]} />
+          <meshStandardMaterial 
+            color="#1e293b" 
+            metalness={0.6} 
+            roughness={0.4}
+          />
+        </mesh>
+      </group>
+
+      {/* Rooftop HVAC Units and Vents */}
+      {[
+        [buildingWidth * 0.25, floors * floorHeight + 1, buildingDepth * 0.25],
+        [-buildingWidth * 0.25, floors * floorHeight + 1, buildingDepth * 0.25],
+        [buildingWidth * 0.25, floors * floorHeight + 1, -buildingDepth * 0.25],
+        [-buildingWidth * 0.25, floors * floorHeight + 1, -buildingDepth * 0.25],
+      ].map((pos, i) => (
+        <mesh key={`hvac-${i}`} position={pos as [number, number, number]} castShadow>
+          <boxGeometry args={[3, 1.5, 2.5]} />
+          <meshStandardMaterial 
+            color="#475569" 
+            metalness={0.5} 
+            roughness={0.7}
+          />
+        </mesh>
+      ))}
+
+      {/* Rooftop Vents - Industrial style */}
+      {[
+        [buildingWidth * 0.15, floors * floorHeight + 1.2, 0],
+        [-buildingWidth * 0.15, floors * floorHeight + 1.2, 0],
+      ].map((pos, i) => (
+        <group key={`vent-${i}`} position={pos as [number, number, number]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.6, 0.8, 2, 8]} />
+            <meshStandardMaterial 
+              color="#64748b" 
+              metalness={0.7} 
+              roughness={0.3}
+            />
+          </mesh>
+          {/* Vent grill */}
+          <mesh position={[0, 1, 0]}>
+            <cylinderGeometry args={[0.65, 0.65, 0.1, 8]} />
+            <meshStandardMaterial 
+              color="#334155" 
+              metalness={0.8} 
+              roughness={0.2}
+            />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Communication Tower/Antenna */}
+      <group position={[0, floors * floorHeight + 5, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.2, 0.3, 6, 8]} />
+          <meshStandardMaterial 
+            color="#94a3b8" 
+            metalness={0.8} 
+            roughness={0.2}
+          />
+        </mesh>
+        {/* Red beacon light */}
+        <mesh position={[0, 3.5, 0]}>
+          <sphereGeometry args={[0.3, 8, 8]} />
+          <meshStandardMaterial 
+            color="#dc2626" 
+            emissive="#dc2626"
+            emissiveIntensity={1.5}
+            metalness={0.3}
+            roughness={0.7}
+          />
+        </mesh>
+        {/* Antenna dishes */}
+        {[-1.5, 1.5].map((yPos, i) => (
+          <mesh key={`dish-${i}`} position={[1, yPos, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.6, 0.4, 0.1, 16]} />
+            <meshStandardMaterial 
+              color="#e2e8f0" 
+              metalness={0.9} 
+              roughness={0.1}
+            />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Helipad markings (optional) */}
+      <group position={[buildingWidth * 0.35, floors * floorHeight + 0.5, -buildingDepth * 0.35]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[4, 32]} />
+          <meshStandardMaterial 
+            color="#fbbf24" 
+            emissive="#f59e0b"
+            emissiveIntensity={0.3}
+            metalness={0.3}
+            roughness={0.8}
+            transparent
+            opacity={0.8}
+          />
+        </mesh>
+        {/* "H" marking */}
+        <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[1.5, 3]} />
+          <meshStandardMaterial 
+            color="#ffffff" 
+            emissive="#fbbf24"
+            emissiveIntensity={0.5}
+          />
+        </mesh>
+      </group>
+
+      {/* Building Name/Logo on top facade */}
+      <mesh position={[0, floors * floorHeight - 2, -buildingDepth/2 - 0.1]} castShadow>
+        <planeGeometry args={[12, 2]} />
+        <meshStandardMaterial 
+          color="#10b981" 
+          emissive="#10b981"
+          emissiveIntensity={0.8}
+          metalness={0.3}
+          roughness={0.7}
+          transparent
+          opacity={0.9}
+        />
+      </mesh>
+
       {/* Entrance canopy */}
       <mesh position={[0, 2.5, -buildingDepth/2 - 1.5]} castShadow receiveShadow>
         <boxGeometry args={[14, 0.2, 3]} />
         <meshStandardMaterial color="#475569" metalness={0.5} roughness={0.5} />
       </mesh>
+
+      {/* Entrance canopy support beams */}
+      {[-5, 5].map((xPos, idx) => (
+        <mesh 
+          key={`beam-${idx}`} 
+          position={[xPos, 1.5, -buildingDepth/2 - 1.5]}
+          castShadow
+        >
+          <boxGeometry args={[0.3, 2, 0.3]} />
+          <meshStandardMaterial color="#64748b" metalness={0.6} roughness={0.4} />
+        </mesh>
+      ))}
+
+      {/* Main entrance glass doors */}
+      <mesh position={[0, 1.5, -buildingDepth/2 - 0.1]} castShadow>
+        <planeGeometry args={[6, 3]} />
+        <meshStandardMaterial 
+          color="#60a5fa" 
+          metalness={0.95} 
+          roughness={0.05}
+          transparent
+          opacity={0.5}
+          emissive="#3b82f6"
+          emissiveIntensity={0.3}
+        />
+      </mesh>
+
+      {/* Entrance steps */}
+      {[0, 1, 2].map((step, idx) => (
+        <mesh 
+          key={`step-${idx}`} 
+          position={[0, 0.15 * (step + 1), -buildingDepth/2 - 2.5 - step * 0.3]}
+          receiveShadow
+        >
+          <boxGeometry args={[8, 0.3, 0.4]} />
+          <meshStandardMaterial color="#334155" metalness={0.3} roughness={0.8} />
+        </mesh>
+      ))}
 
       {/* Entrance pillars */}
       {[-6, 6].map((xPos, idx) => (
@@ -706,7 +1007,7 @@ function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors
   )
 }
 
-function Scene({
+export default function Building3D({
   venues,
   selectedVenue,
   onVenueClick,
@@ -716,7 +1017,23 @@ function Scene({
   isMobile = false,
 }: Building3DProps) {
   return (
-    <>
+    <Canvas
+      camera={{ 
+        position: [30, 25, 30], 
+        fov: 50,
+        near: 0.1,
+        far: 1000
+      }}
+      gl={{ 
+        antialias: true,
+        alpha: true,
+        powerPreference: "high-performance",
+        toneMapping: THREE.ACESFilmicToneMapping,
+        toneMappingExposure: 1.2
+      }}
+      shadows="soft"
+      dpr={[1, 2]}
+    >
       <OrbitControls
         enablePan={true}
         enableZoom={true}
@@ -772,6 +1089,25 @@ function Scene({
         />
       )}
       
+      {/* Environment map for realistic reflections */}
+      <Environment preset="city" background={false} blur={0.8}>
+        {/* Custom light formers for accent lighting */}
+        <Lightformer
+          position={[10, 10, 10]}
+          intensity={0.5}
+          width={10}
+          height={10}
+          color="#60a5fa"
+        />
+        <Lightformer
+          position={[-10, 10, -10]}
+          intensity={0.3}
+          width={10}
+          height={10}
+          color="#a78bfa"
+        />
+      </Environment>
+      
       {/* Building Structure */}
       <BuildingStructure 
         floors={12} 
@@ -796,43 +1132,6 @@ function Scene({
           isMobile={isMobile}  // Pass mobile state to VenueBox
         />
       ))}
-      
-      {/* Fog for depth */}
-      <fog attach="fog" args={['#0f172a', 100, 220]} />
-    </>
-  )
-}
-
-export default function Building3D({
-  venues,
-  selectedVenue,
-  onVenueClick,
-  currentFloor,
-  hoveredVenue,
-  onVenueHover,
-}: Building3DProps) {
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-
-  return (
-    <Canvas
-      shadows={!isMobile}
-      dpr={isMobile ? [1, 1.5] : [1, 2]}
-      camera={{ 
-        position: [70, 35, 70],
-        fov: 55
-      }}
-      style={{ background: '#0f172a' }}
-      performance={{ min: 0.5 }}
-    >
-      <Scene
-        venues={venues}
-        selectedVenue={selectedVenue}
-        onVenueClick={onVenueClick}
-        currentFloor={currentFloor}
-        hoveredVenue={hoveredVenue}
-        onVenueHover={onVenueHover}
-        isMobile={isMobile}
-      />
     </Canvas>
   )
 }

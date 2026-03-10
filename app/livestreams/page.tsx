@@ -2,6 +2,7 @@
 
 import React, { useState, Suspense } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import StreamCard from '@/components/StreamCard'
 import StreamModal from '@/components/StreamModal'
 import { motion } from 'framer-motion'
@@ -158,23 +159,24 @@ function LivestreamsContent() {
                   className="relative h-[200px] xs:h-[250px] sm:h-[350px] md:h-[450px] lg:h-[500px] rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden cursor-pointer group"
                   onClick={() => setSelectedStream(liveStreams[0])}
                 >
-                  {/* Image and Video Tag */}
-                  <div className="absolute inset-0">
-                    <img
-                      src={liveStreams[0].thumbnail}
-                      alt={liveStreams[0].title}
-                      className="w-full h-full object-cover"
-                    />
-                    {liveStreams[0].status === 'live' && (
-                      <video
-                        autoPlay
-                        muted
-                        loop
-                        className="w-full h-full object-cover"
-                      >
-                        <source src={liveStreams[0].videoUrl} type="video/mp4" />
-                        Your browser does not support the video tag.
-                      </video>
+                  {/* Background Image/Thumbnail */}
+                  <div className="absolute inset-0 bg-black">
+                    {liveStreams[0].thumbnail ? (
+                      <>
+                        <Image
+                          src={liveStreams[0].thumbnail}
+                          alt={liveStreams[0].title}
+                          fill
+                          className="object-cover"
+                          priority
+                          unoptimized
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Radio className="w-24 h-24 text-slate-800" />
+                      </div>
                     )}
                   </div>
 
@@ -243,7 +245,7 @@ function LivestreamsContent() {
                       <StreamCard
                         id={stream.id}
                         title={stream.title}
-                        thumbnail={stream.thumbnail}
+                        thumbnail={stream.thumbnail || ''}
                         viewers={stream.viewers}
                         quality={stream.quality || '720p'}
                         isLive={stream.status === 'live'}
@@ -280,7 +282,7 @@ function LivestreamsContent() {
                       <StreamCard
                         id={stream.id}
                         title={stream.title}
-                        thumbnail={stream.thumbnail}
+                        thumbnail={stream.thumbnail || ''}
                         viewers={stream.viewers}
                         quality={stream.quality || '720p'}
                         isLive={false}
@@ -315,7 +317,7 @@ function LivestreamsContent() {
                       <StreamCard
                         id={stream.id}
                         title={stream.title}
-                        thumbnail={stream.thumbnail}
+                        thumbnail={stream.thumbnail || ''}
                         viewers={stream.viewers}
                         quality={stream.quality || '720p'}
                         isLive={false}
