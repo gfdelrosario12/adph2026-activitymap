@@ -9,25 +9,37 @@ import { motion } from 'framer-motion'
 import { ChevronLeft, Search, Radio, Menu, X, Eye } from 'lucide-react'
 import { LiveStream } from '@/lib/types'
 
-// Custom hook to load livestreams
+// Custom hook to load livestreams - Optimized
 function useLiveStreams() {
   const [streams, setStreams] = React.useState<LiveStream[]>([])
   const [loading, setLoading] = React.useState(true)
 
   React.useEffect(() => {
+    let mounted = true
+    
     const fetchStreams = async () => {
       try {
         const res = await fetch('/data/livestreams.json')
+        if (!res.ok) throw new Error('Failed to fetch streams')
         const data = await res.json()
-        setStreams(data)
-        setLoading(false)
+        
+        if (mounted) {
+          setStreams(data)
+          setLoading(false)
+        }
       } catch (error) {
         console.error('Error loading streams:', error)
-        setLoading(false)
+        if (mounted) {
+          setLoading(false)
+        }
       }
     }
 
     fetchStreams()
+    
+    return () => {
+      mounted = false
+    }
   }, [])
 
   return { streams, loading }
@@ -39,18 +51,26 @@ function LivestreamsContent() {
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const filteredStreams = streams.filter(
-    (stream) =>
-      stream.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      stream.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      stream.speaker.toLowerCase().includes(searchQuery.toLowerCase())
+  // Memoize filtered streams to avoid recalculation
+  const filteredStreams = React.useMemo(() => 
+    streams.filter(
+      (stream) =>
+        stream.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        stream.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        stream.speaker.toLowerCase().includes(searchQuery.toLowerCase())
+    ),
+    [streams, searchQuery]
   )
 
-  const liveStreams = filteredStreams.filter((s) => s.status === 'live')
-  const upcomingStreams = filteredStreams.filter((s) => s.status === 'upcoming')
-  const endedStreams = filteredStreams.filter((s) => s.status === 'ended')
+  // Memoize categorized streams
+  const { liveStreams, upcomingStreams, endedStreams } = React.useMemo(() => ({
+    liveStreams: filteredStreams.filter((s) => s.status === 'live'),
+    upcomingStreams: filteredStreams.filter((s) => s.status === 'upcoming'),
+    endedStreams: filteredStreams.filter((s) => s.status === 'ended'),
+  }), [filteredStreams])
 
-  const containerVariants = {
+  // Memoize animation variants
+  const containerVariants = React.useMemo(() => ({
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -58,16 +78,29 @@ function LivestreamsContent() {
         staggerChildren: 0.1,
       },
     },
-  }
+  }), [])
 
-  const itemVariants = {
+  const itemVariants = React.useMemo(() => ({
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
       transition: { duration: 0.4 },
     },
-  }
+  }), [])
+
+  // Optimize handlers with useCallback
+  const handleStreamSelect = React.useCallback((stream: LiveStream) => {
+    setSelectedStream(stream)
+  }, [])
+
+  const handleCloseModal = React.useCallback(() => {
+    setSelectedStream(null)
+  }, [])
+
+  const handleSearchChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -132,7 +165,7 @@ function LivestreamsContent() {
               type="text"
               placeholder="Search streams..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
               className="w-full bg-slate-700 border border-slate-600 rounded-lg pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base text-white placeholder-slate-400 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:ring-opacity-20 transition-all"
             />
           </div>
@@ -157,7 +190,7 @@ function LivestreamsContent() {
               >
                 <div
                   className="relative h-[200px] xs:h-[250px] sm:h-[350px] md:h-[450px] lg:h-[500px] rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden cursor-pointer group"
-                  onClick={() => setSelectedStream(liveStreams[0])}
+                  onClick={() => handleStreamSelect(liveStreams[0])}
                 >
                   {/* Background Image/Thumbnail */}
                   <div className="absolute inset-0 bg-black">
@@ -250,7 +283,7 @@ function LivestreamsContent() {
                         quality={stream.quality || '720p'}
                         isLive={stream.status === 'live'}
                         description={stream.description}
-                        onClick={() => setSelectedStream(stream)}
+                        onClick={() => handleStreamSelect(stream)}
                       />
                     </motion.div>
                   ))}
@@ -287,7 +320,7 @@ function LivestreamsContent() {
                         quality={stream.quality || '720p'}
                         isLive={false}
                         description={stream.description}
-                        onClick={() => setSelectedStream(stream)}
+                        onClick={() => handleStreamSelect(stream)}
                       />
                     </motion.div>
                   ))}
@@ -322,7 +355,7 @@ function LivestreamsContent() {
                         quality={stream.quality || '720p'}
                         isLive={false}
                         description={stream.description}
-                        onClick={() => setSelectedStream(stream)}
+                        onClick={() => handleStreamSelect(stream)}
                       />
                     </motion.div>
                   ))}
@@ -349,7 +382,7 @@ function LivestreamsContent() {
       {/* Stream Modal */}
       <StreamModal
         isOpen={!!selectedStream}
-        onClose={() => setSelectedStream(null)}
+        onClose={handleCloseModal}
         stream={selectedStream}
       />
 

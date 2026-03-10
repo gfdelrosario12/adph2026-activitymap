@@ -1,8 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { memo, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { Play, Users, Volume2 } from 'lucide-react'
+import { Play, Users } from 'lucide-react'
 import Image from 'next/image'
 
 interface StreamCardProps {
@@ -16,7 +16,7 @@ interface StreamCardProps {
   onClick: () => void
 }
 
-export default function StreamCard({
+const StreamCard = memo(function StreamCard({
   title,
   thumbnail,
   viewers,
@@ -25,7 +25,13 @@ export default function StreamCard({
   description,
   onClick,
 }: StreamCardProps) {
-  const [imageError, setImageError] = React.useState(false)
+  const [imageError, setImageError] = useState(false)
+
+  const handleImageError = useCallback(() => {
+    setImageError(true)
+  }, [])
+
+  const formattedViewers = viewers?.toLocaleString() || '0'
 
   return (
     <motion.div
@@ -44,7 +50,7 @@ export default function StreamCard({
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-300"
               unoptimized
-              onError={() => setImageError(true)}
+              onError={handleImageError}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -79,7 +85,7 @@ export default function StreamCard({
           {/* Viewers Badge */}
           <div className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs flex items-center gap-1 z-10">
             <Users className="w-3 h-3" />
-            {viewers?.toLocaleString() || 0}
+            {formattedViewers}
           </div>
         </div>
 
@@ -101,4 +107,6 @@ export default function StreamCard({
       </div>
     </motion.div>
   )
-}
+})
+
+export default StreamCard

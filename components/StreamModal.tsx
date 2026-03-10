@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Eye, Clock, Radio as RadioIcon } from 'lucide-react'
+import { X, Eye, Clock, Radio as RadioIcon, Maximize2, ExternalLink } from 'lucide-react'
 import Image from 'next/image'
 import { LiveStream } from '@/lib/types'
 
@@ -13,38 +13,59 @@ interface StreamModalProps {
 }
 
 export default function StreamModal({ isOpen, onClose, stream }: StreamModalProps) {
-  useEffect(() => {
-    // Handle ESC key to close modal
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  // Memoize autoplay URL to avoid recalculation
+  const autoplayEmbedUrl = useMemo(() => {
+    if (!stream?.embedUrl) return ''
+    const separator = stream.embedUrl.includes('?') ? '&' : '?'
+    return `${stream.embedUrl}${separator}autoplay=1&mute=0`
+  }, [stream?.embedUrl])
+
+  // Memoize YouTube URL extraction
+  const youtubeUrl = useMemo(() => {
+    if (!stream?.embedUrl) return null
+    const match = stream.embedUrl.match(/youtube\.com\/embed\/([^?]+)/)
+    return match?.[1] ? `https://www.youtube.com/watch?v=${match[1]}` : null
+  }, [stream?.embedUrl])
+
+  // Optimize fullscreen handlers with useCallback
+  const openFullscreen = useCallback(() => {
+    const iframe = document.querySelector('iframe')
+    if (iframe?.requestFullscreen) {
+      iframe.requestFullscreen()
     }
-    
+  }, [])
+
+  const exitFullscreen = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen()
+    }
+  }, [])
+
+  const handleFullscreenChange = useCallback(() => {
+    setIsFullscreen(!!document.fullscreenElement)
+  }, [])
+
+  const handleEsc = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') onClose()
+  }, [onClose])
+
+  useEffect(() => {
     if (isOpen) {
       window.addEventListener('keydown', handleEsc)
-      // Prevent body scroll when modal is open
+      document.addEventListener('fullscreenchange', handleFullscreenChange)
       document.body.style.overflow = 'hidden'
     }
     
     return () => {
       window.removeEventListener('keydown', handleEsc)
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
       document.body.style.overflow = 'unset'
     }
-  }, [isOpen, onClose])
+  }, [isOpen, handleEsc, handleFullscreenChange])
 
   if (!stream) return null
-
-  // Add autoplay parameter to embedUrl if it exists
-  const getAutoplayUrl = (url: string | undefined) => {
-    if (!url) return ''
-    
-    // Check if URL already has parameters
-    const separator = url.includes('?') ? '&' : '?'
-    
-    // Add autoplay and mute parameters
-    return `${url}${separator}autoplay=1&mute=0`
-  }
-
-  const autoplayEmbedUrl = getAutoplayUrl(stream.embedUrl)
 
   return (
     <AnimatePresence>
@@ -111,11 +132,54 @@ export default function StreamModal({ isOpen, onClose, stream }: StreamModalProp
                 {/* Close Button */}
                 <button
                   onClick={onClose}
-                  className="absolute top-2 xs:top-3 sm:top-4 right-2 xs:right-3 sm:right-4 bg-black/60 backdrop-blur-sm hover:bg-black/80 text-white p-1.5 xs:p-2 rounded-md sm:rounded-lg transition-colors z-10"
+                  className="absolute top-2 xs:top-3 sm:top-4 right-2 xs:right-3 sm:right-4 bg-black/80 backdrop-blur-md hover:bg-black text-white p-2 xs:p-2.5 sm:p-3 rounded-lg transition-all shadow-lg border border-white/20 z-10 group"
                   aria-label="Close"
                 >
-                  <X className="w-4 h-4 xs:w-5 xs:h-5" />
+                  <X className="w-5 h-5 xs:w-6 xs:h-6 group-hover:rotate-90 transition-transform duration-300" />
                 </button>
+
+                {/* Back from Fullscreen Button - Only shown in fullscreen */}
+                {isFullscreen && (
+                  <button
+                    onClick={exitFullscreen}
+                    className="absolute top-2 xs:top-3 sm:top-4 left-2 xs:left-3 sm:left-4 bg-black/80 backdrop-blur-md hover:bg-black text-white px-4 py-2.5 rounded-lg transition-all shadow-lg border border-white/20 z-10 flex items-center gap-2 font-semibold text-sm"
+                    aria-label="Exit Fullscreen"
+                  >
+                    <X className="w-4 h-4" />
+                    <span>Exit Fullscreen</span>
+                  </button>
+                )}
+
+                {/* Action Buttons (Fullscreen & Open in YouTube) - Side positioned */}
+                {stream.embedUrl && !isFullscreen && (
+                  <div className="absolute bottom-4 xs:bottom-5 sm:bottom-6 right-4 xs:right-5 sm:right-6 flex flex-col gap-2 z-10">
+                    {/* Fullscreen Button */}
+                    <button
+                      onClick={openFullscreen}
+                      className="bg-blue-600/90 backdrop-blur-md hover:bg-blue-600 text-white px-3 xs:px-4 sm:px-5 py-2 xs:py-2.5 sm:py-3 rounded-lg transition-all shadow-xl border border-blue-400/50 group flex items-center gap-2 font-semibold text-xs xs:text-sm whitespace-nowrap"
+                      aria-label="Fullscreen"
+                      title="Watch in Fullscreen"
+                    >
+                      <Maximize2 className="w-4 h-4 xs:w-5 xs:h-5 group-hover:scale-110 transition-transform" />
+                      <span>Fullscreen</span>
+                    </button>
+
+                    {/* Open in YouTube Button */}
+                    {youtubeUrl && (
+                      <a
+                        href={youtubeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-red-600/90 backdrop-blur-md hover:bg-red-600 text-white px-3 xs:px-4 sm:px-5 py-2 xs:py-2.5 sm:py-3 rounded-lg transition-all shadow-xl border border-red-400/50 group flex items-center gap-2 font-semibold text-xs xs:text-sm whitespace-nowrap"
+                        aria-label="Open in YouTube"
+                        title="Watch on YouTube"
+                      >
+                        <ExternalLink className="w-4 h-4 xs:w-5 xs:h-5 group-hover:scale-110 transition-transform" />
+                        <span>YouTube</span>
+                      </a>
+                    )}
+                  </div>
+                )}
 
                 {/* Live Badge Overlay */}
                 {stream.status === 'live' && (
