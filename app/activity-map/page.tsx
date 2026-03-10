@@ -48,6 +48,10 @@ function ActivityMapContent() {
   const selectedVenueData = venues.find((v) => v.id === selectedVenue)
   const venueActivities = selectedVenueData ? getActivitiesByVenue(activities, selectedVenueData.id) : []
 
+  const handleVenueSelect = (venue: Venue) => {
+    setSelectedVenue(venue.id)
+  }
+
   return (
     <div className="h-screen flex flex-col bg-slate-900">
       {/* Header with Hamburger Menu */}
@@ -126,9 +130,10 @@ function ActivityMapContent() {
           <div className="flex-1 relative">
             <Building3D
               venues={currentFloorVenues}
-              selectedVenue={selectedVenue}
-              onVenueClick={setSelectedVenue}
+              activities={activities}
               currentFloor={currentFloor}
+              onVenueClick={handleVenueSelect}
+              externalSelectedVenue={selectedVenue}
             />
 
             {/* Floor Selector */}

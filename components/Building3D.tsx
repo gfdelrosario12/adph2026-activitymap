@@ -1,22 +1,51 @@
 'use client'
 
-import React, { useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, Environment, Lightformer } from '@react-three/drei'
 import * as THREE from 'three'
-import { Venue } from '@/lib/types'
+import { Venue, Activity } from '@/lib/types'
+import ProgramFlowModal from './ProgramFlowModal'
 
 interface Building3DProps {
   venues: Venue[]
-  selectedVenue: string | null
-  onVenueClick: (venueId: string) => void
+  activities: Activity[]
   currentFloor: number
-  hoveredVenue?: string | null
-  onVenueHover?: (venueId: string | null) => void
-  isMobile?: boolean
+  onVenueClick: (venue: Venue) => void
+  externalSelectedVenue?: string | null
 }
 
-function VenueBox({
+// Camera animation component - Optimized
+function CameraController({ target, enabled }: { target: [number, number, number], enabled: boolean }) {
+  const { camera, controls } = useThree()
+  const targetRef = useRef(new THREE.Vector3())
+  const lookAtRef = useRef(new THREE.Vector3())
+  
+  useEffect(() => {
+    targetRef.current.set(...target)
+    lookAtRef.current.set(target[0] - 15, target[1] - 10, target[2] - 15)
+  }, [target])
+  
+  useFrame(() => {
+    if (!enabled || !controls) return
+    
+    const currentDist = camera.position.distanceTo(targetRef.current)
+    
+    // Stop animating when close enough (optimization)
+    if (currentDist < 0.1) return
+    
+    // Smooth lerp with easing
+    camera.position.lerp(targetRef.current, 0.08)
+    // @ts-ignore - OrbitControls has target property
+    controls.target.lerp(lookAtRef.current, 0.08)
+    // @ts-ignore
+    controls.update()
+  })
+  
+  return null
+}
+
+function VenueBoxComponent({
   venue,
   isSelected,
   isOnCurrentFloor,
@@ -1009,77 +1038,194 @@ function BuildingStructure({ floors = 12, currentFloor, hasSelection }: { floors
 
 export default function Building3D({
   venues,
-  selectedVenue,
-  onVenueClick,
+  activities,
   currentFloor,
-  hoveredVenue = null,
-  onVenueHover,
-  isMobile = false,
+  onVenueClick,
+  externalSelectedVenue,
 }: Building3DProps) {
+  const [hoveredVenue, setHoveredVenue] = useState<string | null>(null)
+  const [selectedVenue, setSelectedVenue] = useState<string | null>(null)
+  const [programFlowVenue, setProgramFlowVenue] = useState<Venue | null>(null)
+  const [cameraTarget, setCameraTarget] = useState<[number, number, number]>([30, 25, 30])
+  const [isZoomed, setIsZoomed] = useState(false)
+  const [animating, setAnimating] = useState(false)
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  // Optimized animation stop function
+  const stopAnimation = useRef((delay: number = 800) => {
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current)
+    }
+    animationTimeoutRef.current = setTimeout(() => {
+      setAnimating(false)
+    }, delay)
+  })
+
+  // Update selected venue when external selection changes (from sidebar)
+  useEffect(() => {
+    if (externalSelectedVenue) {
+      const venue = venues.find(v => v.id === externalSelectedVenue)
+      if (venue) {
+        // Zoom to the venue
+        const zoomDistance = 15
+        setCameraTarget([
+          venue.position.x + zoomDistance,
+          venue.position.y + 10,
+          venue.position.z + zoomDistance
+        ])
+        setIsZoomed(true)
+        setAnimating(true)
+        setSelectedVenue(externalSelectedVenue)
+        
+        // Stop animating after camera reaches target
+        stopAnimation.current(800)
+      }
+    }
+  }, [externalSelectedVenue, venues])
+
+  // Reset zoom when floor changes
+  useEffect(() => {
+    if (isZoomed) {
+      setCameraTarget([30, 25, 30])
+      setIsZoomed(false)
+      setAnimating(true)
+      stopAnimation.current(800)
+    }
+  }, [currentFloor])
+
+  const handleVenueClick = useRef((venue: Venue) => {
+    // Start zoom animation
+    setAnimating(true)
+    
+    // Zoom into the venue
+    const zoomDistance = 15
+    setCameraTarget([
+      venue.position.x + zoomDistance,
+      venue.position.y + 10,
+      venue.position.z + zoomDistance
+    ])
+    setIsZoomed(true)
+    
+    // Show program flow for main auditorium, mph1, and workshop venues
+    const workshopVenues = ['library-workshop', 'physics-workshop', 'cafeteria-holding']
+    const showProgramFlow = venue.id === 'main-auditorium' || 
+                           venue.id === 'mph1' || 
+                           workshopVenues.includes(venue.id)
+    
+    // Stop animation after zoom completes, then show modal/details
+    stopAnimation.current(800)
+    
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current)
+    }
+    animationTimeoutRef.current = setTimeout(() => {
+      setAnimating(false)
+      
+      if (showProgramFlow) {
+        setProgramFlowVenue(venue)
+        setSelectedVenue(null)
+      } else {
+        setSelectedVenue(venue.id)
+        onVenueClick(venue)
+        setProgramFlowVenue(null)
+      }
+    }, 800)
+  }).current
+
+  // Handle zoom reset
+  const handleZoomReset = useRef(() => {
+    setAnimating(true)
+    setCameraTarget([30, 25, 30])
+    setIsZoomed(false)
+    setSelectedVenue(null)
+    
+    stopAnimation.current(800)
+  }).current
+
+  // Get hovered venue data for tooltip - Memoized
+  const hoveredVenueData = useMemo(() => 
+    hoveredVenue ? venues.find(v => v.id === hoveredVenue) : null,
+    [hoveredVenue, venues]
+  )
+  
+  const hoveredVenueActivities = useMemo(() => 
+    hoveredVenueData ? activities.filter(a => a.venue === hoveredVenueData.id) : [],
+    [hoveredVenueData, activities]
+  )
+
   return (
-    <Canvas
-      camera={{ 
-        position: [30, 25, 30], 
-        fov: 50,
-        near: 0.1,
-        far: 1000
-      }}
-      gl={{ 
-        antialias: true,
-        alpha: true,
-        powerPreference: "high-performance",
-        toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.2
-      }}
-      shadows="soft"
-      dpr={[1, 2]}
-    >
-      <OrbitControls
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
-        minDistance={30}
-        maxDistance={180}
-        maxPolarAngle={Math.PI / 2.1}
-        minPolarAngle={0.1}
-      />
+    <>
+      <Canvas
+        camera={{ 
+          position: [30, 25, 30], 
+          fov: 50,
+          near: 0.1,
+          far: 1000
+        }}
+        gl={{ 
+          antialias: true,
+          alpha: true,
+          powerPreference: "high-performance",
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.2
+        }}
+        shadows="soft"
+        dpr={[1, 2]}
+      >
+        {/* Camera animation */}
+        <CameraController target={cameraTarget} enabled={animating} />
+        
+        <OrbitControls
+          enablePan={true}
+          enableZoom={true}
+          enableRotate={true}
+          enabled={!animating}
+          minDistance={30}
+          maxDistance={180}
+          maxPolarAngle={Math.PI / 2.1}
+          minPolarAngle={0.1}
+        />
+        
+        {/* Lighting - Simplified for mobile */}
+        <ambientLight intensity={0.5} />
+        
+        {/* Main sun light */}
+        <directionalLight
+          position={[40, 60, 40]}
+          intensity={1.5}
+          castShadow
+          shadow-mapSize-width={4096}
+          shadow-mapSize-height={4096}
+          shadow-camera-left={-90}
+          shadow-camera-right={90}
+          shadow-camera-top={90}
+          shadow-camera-bottom={-90}
+          shadow-camera-near={0.5}
+          shadow-camera-far={250}
+          shadow-bias={-0.0001}
+        />
+        
+        {/* Fill lights - Reduced on mobile */}
+        <directionalLight position={[-40, 40, -40]} intensity={0.6} />
+        <directionalLight position={[0, 30, -50]} intensity={0.4} />
       
-      {/* Lighting - Simplified for mobile */}
-      <ambientLight intensity={isMobile ? 0.6 : 0.5} />
-      
-      {/* Main sun light */}
-      <directionalLight
-        position={[40, 60, 40]}
-        intensity={isMobile ? 1.2 : 1.5}
-        castShadow={!isMobile}
-        shadow-mapSize-width={isMobile ? 2048 : 4096}
-        shadow-mapSize-height={isMobile ? 2048 : 4096}
-        shadow-camera-left={-90}
-        shadow-camera-right={90}
-        shadow-camera-top={90}
-        shadow-camera-bottom={-90}
-        shadow-camera-near={0.5}
-        shadow-camera-far={250}
-        shadow-bias={-0.0001}
-      />
-      
-      {/* Fill lights - Reduced on mobile */}
-      {!isMobile && (
-        <>
-          <directionalLight position={[-40, 40, -40]} intensity={0.6} />
-          <directionalLight position={[0, 30, -50]} intensity={0.4} />
-        </>
-      )}
-      
-      {/* Hemisphere light for natural sky/ground lighting */}
-      <hemisphereLight 
-        intensity={0.4} 
-        color="#87CEEB" 
-        groundColor="#2c3e50" 
-      />
-      
-      {/* Spot light for dramatic effect - Desktop only */}
-      {!isMobile && (
+        {/* Hemisphere light for natural sky/ground lighting */}
+        <hemisphereLight 
+          intensity={0.4} 
+          color="#87CEEB" 
+          groundColor="#2c3e50" 
+        />
+        
+        {/* Spot light for dramatic effect - Desktop only */}
         <spotLight
           position={[0, 70, 0]}
           angle={0.6}
@@ -1087,51 +1233,118 @@ export default function Building3D({
           intensity={0.5}
           castShadow
         />
+        
+        {/* Environment map for realistic reflections */}
+        <Environment preset="city" background={false} blur={0.8}>
+          {/* Custom light formers for accent lighting */}
+          <Lightformer
+            position={[10, 10, 10]}
+            intensity={0.5}
+            width={10}
+            height={10}
+            color="#60a5fa"
+          />
+          <Lightformer
+            position={[-10, 10, -10]}
+            intensity={0.3}
+            width={10}
+            height={10}
+            color="#a78bfa"
+          />
+        </Environment>
+        
+        {/* Building Structure */}
+        <BuildingStructure 
+          floors={12} 
+          currentFloor={currentFloor}
+          hasSelection={false}
+        />
+        
+        {/* Venue boxes */}
+        {venues.map((venue) => (
+          <VenueBoxComponent
+            key={venue.id}
+            venue={venue}
+            isSelected={selectedVenue === venue.id}
+            isOnCurrentFloor={venue.floor === currentFloor}
+            onClick={() => handleVenueClick(venue)}
+            onHover={(hovered: boolean) => {
+              setHoveredVenue(hovered ? venue.id : null)
+            }}
+            isHovered={hoveredVenue === venue.id}
+            isMobile={false}
+          />
+        ))}
+      </Canvas>
+
+      {/* Zoom Reset Button */}
+      {isZoomed && (
+        <button
+          onClick={handleZoomReset}
+          className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg shadow-xl transition-all flex items-center gap-2 font-semibold hover:scale-105 active:scale-95 border border-blue-400/40"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+          </svg>
+          Reset View
+        </button>
       )}
-      
-      {/* Environment map for realistic reflections */}
-      <Environment preset="city" background={false} blur={0.8}>
-        {/* Custom light formers for accent lighting */}
-        <Lightformer
-          position={[10, 10, 10]}
-          intensity={0.5}
-          width={10}
-          height={10}
-          color="#60a5fa"
-        />
-        <Lightformer
-          position={[-10, 10, -10]}
-          intensity={0.3}
-          width={10}
-          height={10}
-          color="#a78bfa"
-        />
-      </Environment>
-      
-      {/* Building Structure */}
-      <BuildingStructure 
-        floors={12} 
-        currentFloor={currentFloor}
-        hasSelection={selectedVenue !== null}
+
+      {/* Hover Tooltip */}
+      {hoveredVenueData && !programFlowVenue && (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-40 max-w-md w-full px-4">
+          <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 backdrop-blur-xl border-2 border-blue-500/50 rounded-xl p-4 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex-1">
+                <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                  <div 
+                    className="w-3 h-3 rounded-full animate-pulse flex-shrink-0" 
+                    style={{ backgroundColor: hoveredVenueData.color }}
+                  />
+                  <span>{hoveredVenueData.name}</span>
+                </h3>
+                <p className="text-slate-400 text-sm mt-1">
+                  Floor {hoveredVenueData.floor + 1}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div className="bg-blue-600/20 rounded-lg p-3 border border-blue-500/30">
+                <div className="text-blue-300 text-xs mb-1">Capacity</div>
+                <div className="text-white font-bold text-xl">{hoveredVenueData.capacity}</div>
+              </div>
+              <div className="bg-purple-600/20 rounded-lg p-3 border border-purple-500/30">
+                <div className="text-purple-300 text-xs mb-1">Activities</div>
+                <div className="text-white font-bold text-xl">{hoveredVenueActivities.length}</div>
+              </div>
+            </div>
+
+            {hoveredVenueActivities.length > 0 && (
+              <div className="bg-green-600/20 rounded-lg p-3 border border-green-500/30 mb-3">
+                <div className="text-green-300 text-xs font-semibold mb-2">Next Activity:</div>
+                <div className="text-white text-sm font-semibold">{hoveredVenueActivities[0].title}</div>
+                <div className="text-slate-300 text-xs mt-1">{hoveredVenueActivities[0].speaker}</div>
+              </div>
+            )}
+
+            <div className="text-center pt-3 border-t border-slate-700">
+              <p className="text-slate-400 text-xs">
+                👆 Click to view full schedule
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Program Flow Modal */}
+      <ProgramFlowModal
+        isOpen={programFlowVenue !== null}
+        onClose={() => setProgramFlowVenue(null)}
+        venueName={programFlowVenue?.name || ''}
+        venueId={programFlowVenue?.id || ''}
+        activities={activities}
       />
-      
-      {/* Venue boxes */}
-      {venues.map((venue) => (
-        <VenueBox
-          key={venue.id}
-          venue={venue}
-          isSelected={selectedVenue === venue.id}
-          isOnCurrentFloor={venue.floor === currentFloor}
-          onClick={() => onVenueClick(venue.id)}
-          onHover={(hovered) => {
-            if (onVenueHover) {
-              onVenueHover(hovered ? venue.id : null)
-            }
-          }}
-          isHovered={hoveredVenue === venue.id}
-          isMobile={isMobile}  // Pass mobile state to VenueBox
-        />
-      ))}
-    </Canvas>
+    </>
   )
 }
