@@ -247,15 +247,17 @@ cd adph-activitymap
 
 2. **Install dependencies**
 ```bash
-# Using npm
-npm install
+# Using npm (with legacy peer deps for React Three Fiber)
+npm install --legacy-peer-deps
 
 # Using yarn
 yarn install
 
-# Using pnpm (recommended)
+# Using pnpm
 pnpm install
 ```
+
+> **Note**: The `--legacy-peer-deps` flag is required for npm due to peer dependency conflicts with React Three Fiber packages. This is already configured in `.npmrc` for automatic use.
 
 3. **Run development server**
 ```bash
@@ -1172,6 +1174,7 @@ vercel --prod
 - ✅ **Image Optimization** - Automatic image optimization
 - ✅ **Analytics** - Built-in web analytics (optional)
 - ✅ **Zero Config** - Works out of the box
+- ✅ **Legacy Peer Deps** - Configured for React Three Fiber
 
 ### Build Settings (Auto-detected)
 
@@ -1179,9 +1182,11 @@ vercel --prod
 Framework Preset: Next.js
 Build Command: npm run build
 Output Directory: .next
-Install Command: npm install
+Install Command: npm install --legacy-peer-deps (configured in .npmrc)
 Node Version: 18.x
 ```
+
+> **Important**: The project includes `.npmrc` and `vercel.json` with `--legacy-peer-deps` configured to handle React Three Fiber peer dependency conflicts. Vercel will automatically use these settings.
 
 ### Environment Variables (Optional)
 
