@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Building3D from '@/components/Building3D'
 import VenueDrawer from '@/components/VenueDrawer'
 import { motion } from 'framer-motion'
-import { ChevronLeft, Filter } from 'lucide-react'
+import { ChevronLeft, Filter, Menu, X } from 'lucide-react'
 import { Venue, Activity, Floor } from '@/lib/types'
 import { getVenuesByFloor, getActivitiesByVenue } from '@/lib/utils/helpers'
 
@@ -16,6 +16,7 @@ function ActivityMapContent() {
   const [selectedVenue, setSelectedVenue] = useState<string | null>(null)
   const [currentFloor, setCurrentFloor] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,29 +50,30 @@ function ActivityMapContent() {
 
   return (
     <div className="h-screen flex flex-col bg-slate-900">
-      {/* Header */}
+      {/* Header with Hamburger Menu */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="border-b border-slate-700 bg-slate-800 bg-opacity-50 backdrop-blur-md px-6 py-4 flex items-center justify-between"
+        className="border-b border-slate-700 bg-slate-800 bg-opacity-50 backdrop-blur-md px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-20 relative"
       >
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <Link
             href="/"
             className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
             aria-label="Go back home"
           >
-            <ChevronLeft className="w-6 h-6 text-white" />
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-white">Venue Map</h1>
-            <p className="text-slate-400 text-sm">
+            <h1 className="text-xl sm:text-2xl font-bold text-white">Venue Map</h1>
+            <p className="text-slate-400 text-xs sm:text-sm">
               {floors[currentFloor]?.name || 'Loading...'}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Desktop Filter Button */}
+        <div className="hidden sm:flex items-center gap-2">
           <button
             aria-label="Filter venues"
             className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
@@ -79,6 +81,38 @@ function ActivityMapContent() {
             <Filter className="w-6 h-6 text-white" />
           </button>
         </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="sm:hidden p-2 text-white hover:bg-slate-700 rounded-lg transition-colors"
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+
+        {/* Mobile Menu Dropdown */}
+        {mobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 bg-slate-800 border-b border-slate-700 shadow-lg sm:hidden z-50">
+            <div className="p-4 flex flex-col gap-3">
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-green-600/20 hover:bg-green-600/30 text-green-300 rounded-lg transition-all active:scale-95"
+              >
+                <ChevronLeft className="w-5 h-5" />
+                <span className="text-sm font-medium">Back to 3D Map</span>
+              </Link>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-all active:scale-95"
+              >
+                <Filter className="w-5 h-5" />
+                <span className="text-sm font-medium">Filter Venues</span>
+              </button>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Main Content */}

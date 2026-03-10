@@ -5,7 +5,7 @@ import Link from 'next/link'
 import StreamCard from '@/components/StreamCard'
 import StreamModal from '@/components/StreamModal'
 import { motion } from 'framer-motion'
-import { ChevronLeft, Search, Radio } from 'lucide-react'
+import { ChevronLeft, Search, Radio, Menu, X } from 'lucide-react'
 import { LiveStream } from '@/lib/types'
 
 // Custom hook to load livestreams
@@ -36,6 +36,7 @@ function LivestreamsContent() {
   const { streams, loading } = useLiveStreams()
   const [selectedStream, setSelectedStream] = useState<LiveStream | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const filteredStreams = streams.filter(
     (stream) =>
@@ -69,7 +70,7 @@ function LivestreamsContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Header */}
+      {/* Header with Hamburger Menu */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -87,15 +88,40 @@ function LivestreamsContent() {
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
                 <Radio className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
-                <span className="hidden xs:inline">Live Streams</span>
-                <span className="xs:hidden">Streams</span>
+                <span className="hidden sm:inline">Live Streams</span>
+                <span className="sm:hidden">Streams</span>
               </h1>
               <p className="text-slate-400 text-xs sm:text-sm">
                 {liveStreams.length} live • {upcomingStreams.length} upcoming
               </p>
             </div>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="sm:hidden p-2 text-white hover:bg-slate-700 rounded-lg transition-colors"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {mobileMenuOpen && (
+          <div className="sm:hidden border-t border-slate-700 bg-slate-800">
+            <div className="p-4 flex flex-col gap-3">
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-green-600/20 hover:bg-green-600/30 text-green-300 rounded-lg transition-all active:scale-95"
+              >
+                <ChevronLeft className="w-5 h-5" />
+                <span className="text-sm font-medium">Back to 3D Map</span>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Search Bar */}
         <div className="px-4 sm:px-6 pb-3 sm:pb-4">

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Building, Radio, ChevronUp, ChevronDown, Clock, Users, Eye, Map } from 'lucide-react'
+import { Building, Radio, ChevronUp, ChevronDown, Clock, Users, Menu, X, Layers, MapPin } from 'lucide-react'
 import Building3D from '@/components/Building3D'
 import { useVenues, useActivities, useFloors } from '@/lib/hooks/useData'
 import { getVenuesByFloor, getActivitiesByVenue, getVenueTypeLabel } from '@/lib/utils/helpers'
@@ -11,8 +11,11 @@ import { APP_CONFIG } from '@/lib/constants/config'
 export default function Home() {
   const [currentFloor, setCurrentFloor] = useState(0)
   const [selectedVenue, setSelectedVenue] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<'perspective' | 'top'>('perspective')
   const [hoveredVenue, setHoveredVenue] = useState<string | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [floorMenuOpen, setFloorMenuOpen] = useState(false)
+  const [venueMenuOpen, setVenueMenuOpen] = useState(false)
+  const [quickNavOpen, setQuickNavOpen] = useState(false)
 
   // Load data from JSON files using custom hooks
   const { venues, loading: venuesLoading } = useVenues()
@@ -45,35 +48,55 @@ export default function Home() {
   }
   return (
     <div className="h-screen flex flex-col bg-slate-900 overflow-hidden">
-      {/* Navigation - Responsive */}
-      <nav className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-3 md:py-4 backdrop-blur-md bg-slate-900 bg-opacity-90 border-b border-green-500/30 z-10">
+      {/* Navigation - Responsive with Hamburger Menu */}
+      <nav className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-3 md:py-4 backdrop-blur-md bg-slate-900 bg-opacity-90 border-b border-green-500/30 z-20 relative">
         <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white flex items-center gap-1.5 sm:gap-2">
           <Building className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
-          <span className="hidden xs:inline">Arduino Day Philippines 2026</span>
-          <span className="xs:hidden">ADP 2026</span>
+          <span className="hidden sm:inline">Arduino Day Philippines 2026</span>
+          <span className="sm:hidden">ADPH 2026</span>
         </h1>
-        <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-          <div className="hidden md:block text-slate-400 text-xs sm:text-sm">
+        
+        {/* Desktop Menu */}
+        <div className="hidden md:flex items-center gap-3 md:gap-4">
+          <div className="text-slate-400 text-sm">
             {currentFloorVenues.length} venues • {venues.length} total
           </div>
-          <button
-            onClick={() => setViewMode(viewMode === 'perspective' ? 'top' : 'perspective')}
-            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 bg-green-600/20 hover:bg-green-600/30 text-green-300 rounded-lg transition-all border border-green-500/30 hover:border-green-400/50"
-            title={viewMode === 'perspective' ? 'Switch to Top View' : 'Switch to Perspective View'}
-          >
-            {viewMode === 'perspective' ? <Map className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-            <span className="text-xs sm:text-sm font-medium hidden sm:inline">
-              {viewMode === 'perspective' ? 'Top View' : 'Perspective'}
-            </span>
-          </button>
           <Link
             href="/livestreams"
-            className="text-slate-300 hover:text-white transition-colors flex items-center gap-1.5 sm:gap-2"
+            className="flex items-center gap-2 px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
           >
-            <Radio className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline text-sm">Streams</span>
+            <Radio className="w-4 h-4" />
+            <span className="text-sm">Streams</span>
           </Link>
         </div>
+
+        {/* Mobile Hamburger Button */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden p-2 text-white hover:bg-slate-800 rounded-lg transition-colors"
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+
+        {/* Mobile Menu Dropdown */}
+        {mobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 bg-slate-900 border-b border-green-500/30 shadow-lg md:hidden z-50">
+            <div className="flex flex-col p-4 gap-3">
+              <div className="text-slate-400 text-sm text-center pb-2 border-b border-slate-700">
+                {currentFloorVenues.length} venues • {venues.length} total
+              </div>
+              <Link
+                href="/livestreams"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 px-4 py-3 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors active:scale-95"
+              >
+                <Radio className="w-5 h-5" />
+                <span className="text-sm">View Livestreams</span>
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Main Content */}
@@ -85,22 +108,10 @@ export default function Home() {
             selectedVenue={selectedVenue}
             onVenueClick={setSelectedVenue}
             currentFloor={currentFloor}
-            viewMode={viewMode}
             hoveredVenue={hoveredVenue}
             onVenueHover={setHoveredVenue}
           />
         </div>
-
-        {/* Top View Indicator Banner - Responsive */}
-        {viewMode === 'top' && (
-          <div className="absolute top-4 sm:top-8 md:top-24 left-1/2 transform -translate-x-1/2 z-30 pointer-events-none px-4">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-full shadow-2xl border-2 border-white/30 backdrop-blur-sm flex items-center gap-2 sm:gap-3 animate-pulse">
-              <Map className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="font-bold text-xs sm:text-sm md:text-base">Floor Plan View Active</span>
-              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-ping"></div>
-            </div>
-          </div>
-        )}
 
         {/* Hover Tooltip - Enhanced UX - Responsive */}
         {hoveredVenueData && hoveredVenue !== selectedVenue && (
@@ -168,26 +179,102 @@ export default function Home() {
           </div>
         )}
 
-        {/* Floor Controls - Responsive with mobile optimization */}
-        <div className="absolute left-2 sm:left-4 md:left-6 top-1/2 -translate-y-1/2 bg-gradient-to-br from-slate-800 to-slate-900 backdrop-blur-xl border-2 border-blue-500/30 rounded-xl p-2 sm:p-3 md:p-4 z-20 shadow-2xl">
-          <div className="flex flex-col items-center gap-2 sm:gap-3">
-            {/* View Mode Indicator - Hidden on mobile */}
-            <div className="hidden sm:block mb-2 pb-3 border-b border-slate-700/50 w-full">
-              <div className="text-slate-400 text-xs text-center mb-2">View Mode</div>
-              <div className="flex items-center justify-center gap-2 text-xs">
-                <div className={`px-2 py-1 rounded ${viewMode === 'perspective' ? 'bg-blue-600 text-white' : 'text-slate-500'}`}>
-                  Persp.
-                </div>
-                <div className={`px-2 py-1 rounded ${viewMode === 'top' ? 'bg-blue-600 text-white' : 'text-slate-500'}`}>
-                  Top
-                </div>
+        {/* Floor Controls + Quick Nav - Desktop only */}
+        <div className="hidden md:flex flex-col items-center absolute left-6 top-1/2 -translate-y-1/2 z-30 space-y-3">
+          {/* Floor Up / Floor Number / Floor Down */}
+          <div className="bg-gradient-to-br from-slate-800 to-slate-900 backdrop-blur-xl border-2 border-blue-500/30 rounded-xl p-4 shadow-2xl flex flex-col items-center gap-3">
+            <button
+              onClick={() => handleFloorChange('up')}
+              disabled={currentFloor >= 11}
+              className="p-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed text-white transition-all shadow-lg hover:shadow-blue-500/50 hover:scale-105 disabled:hover:scale-100 active:scale-95"
+              title="Go up one floor"
+            >
+              <ChevronUp className="w-6 h-6" />
+            </button>
+
+            <div className="text-center py-2">
+              <div className="text-white font-bold text-3xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                {currentFloor + 1}
+              </div>
+              <div className="text-slate-400 text-xs whitespace-nowrap mt-1">
+                {floors[currentFloor]?.name || 'Floor'}
               </div>
             </div>
 
             <button
+              onClick={() => handleFloorChange('down')}
+              disabled={currentFloor <= 0}
+              className="p-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed text-white transition-all shadow-lg hover:shadow-blue-500/50 hover:scale-105 disabled:hover:scale-100 active:scale-95"
+              title="Go down one floor"
+            >
+              <ChevronDown className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Quick Jump Button */}
+          <button
+            onClick={() => setQuickNavOpen(!quickNavOpen)}
+            className="w-full px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg shadow-xl transition-all flex items-center justify-center gap-2 text-xs font-semibold hover:shadow-purple-500/50 hover:scale-105 active:scale-95 border border-purple-400/40"
+            title={quickNavOpen ? "Close floor list" : "View all floors"}
+          >
+            <Layers className="w-4 h-4" />
+            <span>{quickNavOpen ? 'Close List' : 'All Floors'}</span>
+          </button>
+
+          {/* Quick Navigation Dropdown */}
+          {quickNavOpen && (
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 backdrop-blur-xl border-2 border-purple-500/30 rounded-xl p-3 shadow-2xl max-h-[45vh] overflow-y-auto animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-700">
+                <span className="text-white font-semibold text-xs flex items-center gap-1.5">
+                  <Layers className="w-4 h-4 text-purple-400" />
+                  Jump to Floor
+                </span>
+                <button
+                  onClick={() => setQuickNavOpen(false)}
+                  className="text-slate-400 hover:text-white transition-colors p-1 hover:bg-slate-700 rounded"
+                  aria-label="Close"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              
+              <div className="space-y-1">
+                {floors.map((floor, idx) => {
+                  const floorVenueCount = venues.filter(v => v.floor === idx).length
+                  return (
+                    <button
+                      key={floor.id}
+                      onClick={() => {
+                        setCurrentFloor(idx)
+                        setQuickNavOpen(false)
+                      }}
+                      className={`w-full text-left px-2.5 py-2 rounded-lg text-xs transition-all flex items-center justify-between group ${
+                        currentFloor === idx
+                          ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md font-semibold'
+                          : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                      }`}
+                    >
+                      <span className="truncate">{floor.name}</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0 ml-2 ${
+                        currentFloor === idx ? 'bg-white/20' : 'bg-slate-600 group-hover:bg-slate-500'
+                      }`}>
+                        {floorVenueCount}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Floor Controls - Unchanged */}
+        <div className="md:hidden absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-gradient-to-br from-slate-800 to-slate-900 backdrop-blur-xl border-2 border-blue-500/30 rounded-xl p-2 sm:p-3 z-20 shadow-2xl">
+          <div className="flex flex-col items-center gap-2 sm:gap-3">
+            <button
               onClick={() => handleFloorChange('up')}
               disabled={currentFloor >= 11}
-              className="p-2 sm:p-2.5 md:p-3 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all shadow-lg hover:shadow-blue-500/50 hover:scale-110 disabled:hover:scale-100 active:scale-95"
+              className="p-2 sm:p-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all shadow-lg hover:shadow-blue-500/50 hover:scale-110 disabled:hover:scale-100 active:scale-95"
               title="Go up one floor"
             >
               <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -201,52 +288,45 @@ export default function Home() {
             <button
               onClick={() => handleFloorChange('down')}
               disabled={currentFloor <= 0}
-              className="p-2 sm:p-2.5 md:p-3 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all shadow-lg hover:shadow-blue-500/50 hover:scale-110 disabled:hover:scale-100 active:scale-95"
+              className="p-2 sm:p-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all shadow-lg hover:shadow-blue-500/50 hover:scale-110 disabled:hover:scale-100 active:scale-95"
               title="Go down one floor"
             >
               <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
-
-        {/* Venue Info Panel - Responsive with drawer on mobile */}
-        <div className="absolute right-2 sm:right-4 md:right-6 top-2 sm:top-4 md:top-6 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 backdrop-blur-xl border-2 border-purple-500/30 rounded-xl p-3 sm:p-4 md:p-6 w-[calc(100vw-5rem)] sm:w-80 md:w-96 z-20 shadow-2xl max-h-[40vh] sm:max-h-[50vh] md:max-h-[70vh] overflow-y-auto">
-          <h2 className="text-white font-bold text-lg sm:text-xl md:text-2xl mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3">
-            <Building className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
+        {/* Venue Info Panel - Desktop only, full height available (hidden on mobile, replaced by drawer) */}
+        <div className="hidden md:block absolute right-2 sm:right-4 md:right-6 top-2 sm:top-4 md:top-6 bottom-2 sm:bottom-4 md:bottom-6 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 backdrop-blur-xl border-2 border-purple-500/30 rounded-xl p-3 sm:p-4 md:p-5 w-64 md:w-72 lg:w-80 z-20 shadow-2xl overflow-y-auto">
+          <h2 className="text-white font-bold text-base sm:text-lg md:text-xl mb-2 sm:mb-3 flex items-center gap-2">
+            <Building className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
             <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
               {floors[currentFloor].name}
             </span>
           </h2>
 
           {/* Floor Summary - Highlight active venues */}
-          <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-lg border-2 border-blue-400/40">
-            <div className="flex items-center justify-between mb-2">
+          <div className="mb-2 sm:mb-3 p-2.5 sm:p-3 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-lg border-2 border-blue-400/40">
+            <div className="flex items-center justify-between mb-1.5">
               <div className="text-blue-300 text-xs sm:text-sm font-semibold">Active Venues</div>
-              <div className="text-white text-xl sm:text-2xl font-bold">{currentFloorVenues.length}</div>
+              <div className="text-white text-lg sm:text-xl font-bold">{currentFloorVenues.length}</div>
             </div>
             <div className="text-slate-300 text-[10px] sm:text-xs">
               All venues highlighted in 3D view
             </div>
-            {viewMode === 'top' && (
-              <div className="mt-2 text-blue-400 text-[10px] sm:text-xs flex items-center gap-1">
-                <Map className="w-3 h-3" />
-                Top-down floor plan view active
-              </div>
-            )}
           </div>
           
           {selectedVenueData && venueActivities.length > 0 && (
-            <div className="mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-lg border-2 border-blue-500/40 shadow-lg">
-              <h3 className="text-white font-bold mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
-                <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-400 rounded-full animate-pulse"></div>
+            <div className="mb-2 sm:mb-3 p-2.5 sm:p-3 bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-lg border-2 border-blue-500/40 shadow-lg">
+              <h3 className="text-white font-bold mb-1.5 sm:mb-2 flex items-center gap-2 text-sm">
+                <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-green-400 rounded-full animate-pulse"></div>
                 <span className="truncate">{selectedVenueData?.name}</span>
               </h3>
-              <div className="space-y-2 sm:space-y-3">
+              <div className="space-y-1.5 sm:space-y-2">
                 {venueActivities.map(activity => (
-                  <div key={activity.id} className="text-xs sm:text-sm bg-slate-800/50 p-2 sm:p-3 rounded-lg border border-slate-600/50">
+                  <div key={activity.id} className="text-xs sm:text-sm bg-slate-800/50 p-2 rounded-lg border border-slate-600/50">
                     <div className="text-blue-300 font-semibold truncate">{activity.title}</div>
-                    <div className="text-slate-300 text-[10px] sm:text-xs mt-1 truncate">{activity.speaker}</div>
-                    <div className="flex items-center gap-2 sm:gap-3 text-slate-400 text-[10px] sm:text-xs mt-2">
+                    <div className="text-slate-300 text-[10px] sm:text-xs mt-0.5 truncate">{activity.speaker}</div>
+                    <div className="flex items-center gap-2 text-slate-400 text-[10px] sm:text-xs mt-1.5">
                       <span className="flex items-center gap-1">
                         <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                         <span className="hidden sm:inline">{activity.startTime} - {activity.endTime}</span>
@@ -263,8 +343,8 @@ export default function Home() {
             </div>
           )}
 
-          <div className="space-y-1.5 sm:space-y-2">
-            <div className="text-slate-400 text-[10px] sm:text-xs mb-2 sm:mb-3 flex items-center gap-2">
+          <div className="space-y-1.5">
+            <div className="text-slate-400 text-[10px] sm:text-xs mb-2 flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
               {currentFloorVenues.length} venues visible
             </div>
@@ -275,7 +355,7 @@ export default function Home() {
                   <button
                     key={venue.id}
                     onClick={() => setSelectedVenue(venue.id)}
-                    className={`w-full text-left p-2.5 sm:p-3 md:p-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] ${
+                    className={`w-full text-left p-2 sm:p-2.5 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] ${
                       selectedVenue === venue.id
                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xl shadow-blue-500/50 border-2 border-blue-400'
                         : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 border-2 border-transparent hover:border-slate-600'
@@ -304,65 +384,173 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Floor List - Responsive, hidden on mobile */}
-        <div className="hidden md:block absolute right-2 md:right-6 bottom-2 md:bottom-6 bg-gradient-to-br from-slate-800 to-slate-900 backdrop-blur-xl border-2 border-slate-600/30 rounded-xl p-3 md:p-4 z-20 max-h-60 md:max-h-72 overflow-y-auto shadow-2xl">
-          {/* Color Legend */}
-          <div className="mb-3 md:mb-4 pb-2 md:pb-3 border-b border-slate-700/50">
-            <div className="text-white font-bold text-[10px] md:text-xs mb-2">Venue Types</div>
-            <div className="space-y-1 md:space-y-1.5">
-              <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs">
-                <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full" style={{ backgroundColor: '#10b981' }}></div>
-                <span className="text-slate-300">Labs</span>
+        {/* Mobile Floor Menu Button (Bottom Left) - Only visible on small screens */}
+        <button
+          onClick={() => setFloorMenuOpen(!floorMenuOpen)}
+          className="md:hidden fixed bottom-4 left-4 z-30 p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-2xl active:scale-95 transition-all border-2 border-blue-400/50"
+          aria-label="Toggle floor menu"
+        >
+          <Layers className="w-6 h-6" />
+        </button>
+
+        {/* Mobile Venue Menu Button (Bottom Right) - Only visible on small screens */}
+        <button
+          onClick={() => setVenueMenuOpen(!venueMenuOpen)}
+          className="md:hidden fixed bottom-4 right-4 z-30 p-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-2xl active:scale-95 transition-all border-2 border-purple-400/50"
+          aria-label="Toggle venue menu"
+        >
+          <MapPin className="w-6 h-6" />
+        </button>
+
+        {/* Mobile Floor Menu Drawer */}
+        {floorMenuOpen && (
+          <div className="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => setFloorMenuOpen(false)}>
+            <div 
+              className="absolute bottom-0 left-0 right-0 bg-slate-900 rounded-t-2xl p-6 shadow-2xl border-t-2 border-blue-500/50 max-h-[70vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-white font-bold text-xl flex items-center gap-2">
+                  <Layers className="w-6 h-6 text-blue-400" />
+                  Floor Navigation
+                </h3>
+                <button
+                  onClick={() => setFloorMenuOpen(false)}
+                  className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs">
-                <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full" style={{ backgroundColor: '#059669' }}></div>
-                <span className="text-slate-300">Workshops</span>
+
+              {/* Current Floor Display */}
+              <div className="mb-6 p-4 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl border-2 border-blue-400/40">
+                <div className="text-blue-300 text-sm mb-2">Current Floor</div>
+                <div className="text-white font-bold text-4xl">{floors[currentFloor].name}</div>
+                <div className="text-slate-400 text-sm mt-1">{currentFloorVenues.length} venues on this floor</div>
               </div>
-              <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs">
-                <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
-                <span className="text-slate-300">Booths and Activities</span>
+
+              {/* Floor Controls */}
+              <div className="flex gap-3 mb-6">
+                <button
+                  onClick={() => handleFloorChange('down')}
+                  disabled={currentFloor <= 0}
+                  className="flex-1 p-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:opacity-50 text-white rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <ChevronDown className="w-6 h-6" />
+                  <span>Down</span>
+                </button>
+                <button
+                  onClick={() => handleFloorChange('up')}
+                  disabled={currentFloor >= 11}
+                  className="flex-1 p-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:opacity-50 text-white rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <span>Up</span>
+                  <ChevronUp className="w-6 h-6" />
+                </button>
               </div>
-              <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs">
-                <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full" style={{ backgroundColor: '#15803d' }}></div>
-                <span className="text-slate-300">Facilities</span>
-              </div>
-              <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs">
-                <span className="text-slate-300">🚻 Comfort Rooms</span>
-              </div>
-              <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs">
-                <span className="text-slate-300">🔒 Restricted Access</span>
+
+              {/* Quick Floor Selection */}
+              <div>
+                <div className="text-slate-400 text-sm mb-3">Quick Jump</div>
+                <div className="grid grid-cols-4 gap-2">
+                  {floors.map((floor) => (
+                    <button
+                      key={floor.level}
+                      onClick={() => {
+                        setCurrentFloor(floor.level)
+                        setFloorMenuOpen(false)
+                      }}
+                      className={`p-3 rounded-lg text-sm font-semibold transition-all ${
+                        currentFloor === floor.level
+                          ? 'bg-blue-600 text-white shadow-lg'
+                          : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                      }`}
+                    >
+                      {floor.level + 1}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
+        )}
 
-          <div className="text-white font-bold text-xs md:text-sm mb-2 md:mb-3 flex items-center gap-2">
-            <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-400 rounded-full"></div>
-            Quick Nav
-          </div>
-          <div className="space-y-0.5 md:space-y-1">
-            {floors.map((floor, idx) => {
-              const floorVenueCount = venues.filter(v => v.floor === idx).length
-              return (
+        {/* Mobile Venue Menu Drawer */}
+        {venueMenuOpen && (
+          <div className="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => setVenueMenuOpen(false)}>
+            <div 
+              className="absolute bottom-0 left-0 right-0 bg-slate-900 rounded-t-2xl p-6 shadow-2xl border-t-2 border-purple-500/50 max-h-[70vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-white font-bold text-xl flex items-center gap-2">
+                  <MapPin className="w-6 h-6 text-purple-400" />
+                  {floors[currentFloor].name}
+                </h3>
                 <button
-                  key={floor.id}
-                  onClick={() => setCurrentFloor(idx)}
-                  className={`w-full text-left px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm transition-all flex items-center justify-between ${
-                    currentFloor === idx
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30 font-semibold'
-                      : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
-                  }`}
+                  onClick={() => setVenueMenuOpen(false)}
+                  className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
                 >
-                  <span className="truncate">{floor.name}</span>
-                  <span className={`text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full ${
-                    currentFloor === idx ? 'bg-white/20' : 'bg-slate-600'
-                  }`}>
-                    {floorVenueCount}
-                  </span>
+                  <X className="w-5 h-5" />
                 </button>
-              )
-            })}
+              </div>
+
+              {/* Floor Summary */}
+              <div className="mb-4 p-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-xl border-2 border-purple-400/40">
+                <div className="flex items-center justify-between">
+                  <div className="text-purple-300 text-sm">Active Venues</div>
+                  <div className="text-white text-3xl font-bold">{currentFloorVenues.length}</div>
+                </div>
+              </div>
+
+              {/* Venue List */}
+              <div>
+                <div className="text-slate-400 text-sm mb-3">Venues on this floor</div>
+                {currentFloorVenues.length > 0 ? (
+                  <div className="space-y-2">
+                    {currentFloorVenues.map((venue) => (
+                      <button
+                        key={venue.id}
+                        onClick={() => {
+                          setSelectedVenue(venue.id)
+                          setVenueMenuOpen(false)
+                        }}
+                        className={`w-full text-left p-4 rounded-xl transition-all ${
+                          selectedVenue === venue.id
+                            ? 'bg-purple-600 text-white shadow-lg'
+                            : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1">
+                            <div className="font-semibold text-base mb-1">{venue.name}</div>
+                            <div className="text-xs opacity-75 flex items-center gap-3">
+                              <span className="flex items-center gap-1">
+                                <Users className="w-3 h-3" />
+                                {venue.capacity}
+                              </span>
+                              <span>{getVenueTypeLabel(venue.color)}</span>
+                            </div>
+                          </div>
+                          <div 
+                            className="w-3 h-3 rounded-full flex-shrink-0 mt-1"
+                            style={{ backgroundColor: venue.color }}
+                          />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center text-slate-500 py-8">
+                    No venues on this floor
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+
       </div>
     </div>
   )

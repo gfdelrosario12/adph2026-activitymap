@@ -1,4 +1,4 @@
-# Arduino Day Philippines 2026 🇵🇭
+# Arduino Day Philippines 2026 - Activity Site Map 🇵🇭
 
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)
@@ -639,10 +639,17 @@ xl:  '1280px'  // Desktops (HD displays)
   - Full text display
   - Larger icons (h-4 w-4)
 
-#### Floor List Panel
-- **Hidden on mobile** (< 768px)
-- **Visible on tablet+** (≥ 768px)
-- Quick navigation for desktop users
+#### Quick Navigation Panel
+- **Mobile**: 
+  - Hidden by default, use hamburger menu
+  - Compact design, vertical list
+  - Smooth slide-in/out animation
+  - Tappable areas: minimum 44px height
+
+- **Tablet+**: 
+  - Always visible on right side
+  - Expanded view with icons
+  - Quick access to floors and venues
 
 #### Hover Tooltip
 - **Mobile**: Fixed centered overlay, max-w-[90vw]
@@ -934,10 +941,9 @@ test: Add unit tests for helpers
 - [ ] Real-time attendance tracking
 - [ ] QR code check-in system
 - [ ] Push notifications
-- [ ] Multi-language support
-- [ ] AR navigation
-- [ ] Analytics dashboard
-- [ ] Social media integration
+- [ ] User authentication
+- [ ] Personalized schedules
+- [ ] Social features (comments, reactions)
 
 **Improvements:**
 - [ ] Performance optimization
@@ -1347,6 +1353,28 @@ This project wouldn't be possible without:
 - 📍 **Venue**: Asia Pacific College, Makati, Philippines
 
 ## 🗺️ Roadmap
+
+## 📝 Changelog
+
+### Latest Updates (March 2026)
+**UI/UX Improvements - Collapsible Quick Navigation**
+- 🎯 Quick Navigation now a collapsible dropdown above Floor Controls
+- 🔘 "Jump to Floor" button to toggle navigation panel on/off
+- 📐 Venue Info Panel uses full available height (top to bottom)
+- ✨ Clean, minimal layout - navigation hidden by default
+- 🎨 Auto-closes when floor is selected for streamlined UX
+- 📱 Mobile drawers remain unchanged for optimal touch experience
+- ✅ No overflow, no clutter - opens only when needed
+- ✅ Verified production build and TypeScript compilation
+
+**Previous Updates**
+- 🍔 Added hamburger menu for main navigation on mobile devices
+- 🎛️ Implemented floating action buttons for floor/venue controls (mobile)
+- 📲 Created slide-up drawers for floor and venue menus on mobile
+- 🖥️ Desktop layout optimized with collapsible navigation controls
+- 📦 Consolidated documentation and removed backup files
+- 🚀 Enhanced Vercel deployment configuration with legacy peer deps support
+- 🎨 Updated branding: "ADPH 2026" shortcut on mobile
 
 ### Version 1.0 (Current) ✅
 - [x] Interactive 3D building visualization

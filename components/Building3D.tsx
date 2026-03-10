@@ -11,7 +11,6 @@ interface Building3DProps {
   selectedVenue: string | null
   onVenueClick: (venueId: string) => void
   currentFloor: number
-  viewMode?: 'perspective' | 'top'
   hoveredVenue?: string | null
   onVenueHover?: (venueId: string | null) => void
   isMobile?: boolean
@@ -751,7 +750,6 @@ function Scene({
   selectedVenue,
   onVenueClick,
   currentFloor,
-  viewMode = 'perspective',
   hoveredVenue = null,
   onVenueHover,
   isMobile = false,
@@ -759,15 +757,13 @@ function Scene({
   return (
     <>
       <OrbitControls
-        maxDistance={viewMode === 'top' ? 120 : (isMobile ? 200 : 180)}
-        minDistance={viewMode === 'top' ? 50 : (isMobile ? 40 : 30)}
-        maxPolarAngle={viewMode === 'top' ? 0.1 : Math.PI * 0.48}
-        minPolarAngle={viewMode === 'top' ? 0 : Math.PI * 0.05}
         enablePan={true}
-        target={[0, currentFloor * 4 + 2, 0]}
-        enableDamping
-        dampingFactor={0.05}
-        enableRotate={viewMode !== 'top'}  // Disable rotation in top view for pure overhead
+        enableZoom={true}
+        enableRotate={true}
+        minDistance={30}
+        maxDistance={180}
+        maxPolarAngle={Math.PI / 2.1}
+        minPolarAngle={0.1}
       />
       
       {/* Lighting - Simplified for mobile */}
@@ -851,52 +847,27 @@ export default function Building3D({
   selectedVenue,
   onVenueClick,
   currentFloor,
-  viewMode = 'perspective',
   hoveredVenue,
   onVenueHover,
 }: Building3DProps) {
-  // Detect mobile device for performance optimization
-  const [isMobile, setIsMobile] = React.useState(false)
-
-  React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  // Dynamic camera position based on view mode and device
-  // Top view: directly overhead with minimal offset for rendering
-  const cameraPosition: [number, number, number] = viewMode === 'top' 
-    ? [0, 100, 0.01]  // Truly top-down view (almost zero Z offset)
-    : isMobile 
-    ? [90, 45, 90]    // Farther away on mobile for better overview
-    : [70, 35, 70]    // Perspective view desktop
-
-  // Adjust FOV for mobile
-  const fov = viewMode === 'top' ? 70 : (isMobile ? 65 : 55)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   return (
     <Canvas
-      shadows={!isMobile}  // Disable shadows on mobile for performance
-      dpr={isMobile ? [1, 1.5] : [1, 2]}  // Lower pixel ratio on mobile
+      shadows={!isMobile}
+      dpr={isMobile ? [1, 1.5] : [1, 2]}
       camera={{ 
-        position: cameraPosition, 
-        fov: fov,
-        near: 0.1,
-        far: 300,
+        position: [70, 35, 70],
+        fov: 55
       }}
-      style={{ width: '100%', height: '100%' }}
-      performance={{ min: 0.5 }}  // Adaptive performance
+      style={{ background: '#0f172a' }}
+      performance={{ min: 0.5 }}
     >
       <Scene
         venues={venues}
         selectedVenue={selectedVenue}
         onVenueClick={onVenueClick}
         currentFloor={currentFloor}
-        viewMode={viewMode}
         hoveredVenue={hoveredVenue}
         onVenueHover={onVenueHover}
         isMobile={isMobile}
