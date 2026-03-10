@@ -915,19 +915,20 @@ export default function Building3D({
   const [isZoomed, setIsZoomed] = useState(false)
   const [animating, setAnimating] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isPanMode, setIsPanMode] = useState(false)
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const mouseMoveThrottleRef = useRef<NodeJS.Timeout | null>(null)
 
   // Track mouse position for tooltip with throttling for performance
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      // Throttle mouse position updates to every 16ms (60fps)
+      // Throttle mouse position updates to every 32ms (~30fps for tooltips)
       if (mouseMoveThrottleRef.current) return
       
       mouseMoveThrottleRef.current = setTimeout(() => {
         setMousePosition({ x: e.clientX, y: e.clientY })
         mouseMoveThrottleRef.current = null
-      }, 16)
+      }, 32)
     }
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true })
@@ -1039,6 +1040,11 @@ export default function Building3D({
     stopAnimation.current(800)
   }).current
 
+  // Toggle pan mode
+  const togglePanMode = useCallback(() => {
+    setIsPanMode(prev => !prev)
+  }, [])
+
   // Get hovered venue data for tooltip - Memoized
   const hoveredVenueData = useMemo(() => 
     hoveredVenue ? venues.find(v => v.id === hoveredVenue) : null,
@@ -1090,11 +1096,12 @@ export default function Building3D({
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.2,
           logarithmicDepthBuffer: true,
+          stencil: false,
         }}
         shadows="soft"
         dpr={[1, 2]}
-        frameloop="demand" // Only render when needed
-        performance={{ min: 0.5 }} // Adaptive performance
+        frameloop="demand"
+        performance={{ min: 0.5, max: 1, debounce: 200 }}
       >
         {/* Camera animation */}
         <CameraController target={cameraTarget} enabled={animating} />
@@ -1104,20 +1111,20 @@ export default function Building3D({
           enableZoom={true}
           enableRotate={true}
           enabled={!animating}
-          minDistance={20}
-          maxDistance={180}
+          minDistance={15}
+          maxDistance={200}
           maxPolarAngle={Math.PI / 2.1}
           minPolarAngle={0.1}
-          panSpeed={1.5}
-          zoomSpeed={1.2}
-          rotateSpeed={0.8}
+          panSpeed={2.0}
+          zoomSpeed={1.5}
+          rotateSpeed={1.0}
           mouseButtons={{
-            LEFT: THREE.MOUSE.ROTATE,
+            LEFT: isPanMode ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
             MIDDLE: THREE.MOUSE.DOLLY,
-            RIGHT: THREE.MOUSE.PAN
+            RIGHT: isPanMode ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN
           }}
           touches={{
-            ONE: THREE.TOUCH.ROTATE,
+            ONE: isPanMode ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE,
             TWO: THREE.TOUCH.DOLLY_PAN
           }}
         />
@@ -1216,18 +1223,41 @@ export default function Building3D({
         ))}
       </Canvas>
 
-      {/* Zoom Reset Button */}
-      {isZoomed && (
+      {/* Control Buttons */}
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 flex gap-3">
+        {/* Pan Mode Toggle */}
         <button
-          onClick={handleZoomReset}
-          className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg shadow-xl transition-all flex items-center gap-2 font-semibold hover:scale-105 active:scale-95 border border-blue-400/40"
+          onClick={togglePanMode}
+          className={`px-5 py-3 ${
+            isPanMode 
+              ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700' 
+              : 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800'
+          } text-white rounded-lg shadow-xl transition-all flex items-center gap-2 font-semibold hover:scale-105 active:scale-95 border ${
+            isPanMode ? 'border-green-400/40' : 'border-slate-400/40'
+          }`}
+          title={isPanMode ? 'Pan Mode: ON (Left-click to pan)' : 'Pan Mode: OFF (Left-click to rotate)'}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
           </svg>
-          Reset View
+          <span className="hidden sm:inline">{isPanMode ? 'Pan Mode' : 'Rotate Mode'}</span>
+          <span className="sm:hidden">{isPanMode ? 'Pan' : 'Rotate'}</span>
         </button>
-      )}
+
+        {/* Zoom Reset Button */}
+        {isZoomed && (
+          <button
+            onClick={handleZoomReset}
+            className="px-5 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg shadow-xl transition-all flex items-center gap-2 font-semibold hover:scale-105 active:scale-95 border border-blue-400/40"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+            </svg>
+            <span className="hidden sm:inline">Reset View</span>
+            <span className="sm:hidden">Reset</span>
+          </button>
+        )}
+      </div>
 
       {/* Hover Tooltip */}
       {hoveredVenueData && !programFlowVenue && (
