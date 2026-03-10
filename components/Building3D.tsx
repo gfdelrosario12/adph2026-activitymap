@@ -1102,9 +1102,16 @@ export default function Building3D({
         dpr={[1, 2]}
         frameloop="demand"
         performance={{ min: 0.5, max: 1, debounce: 200 }}
+        style={{ background: 'linear-gradient(to bottom, #0f172a 0%, #1e293b 50%, #0f172a 100%)' }}
       >
         {/* Camera animation */}
         <CameraController target={cameraTarget} enabled={animating} />
+        
+        {/* Background color */}
+        <color attach="background" args={['#0f172a']} />
+        
+        {/* Fog for depth perception */}
+        <fog attach="fog" args={['#0f172a', 80, 250]} />
         
         <OrbitControls
           enablePan={true}
