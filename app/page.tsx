@@ -113,67 +113,85 @@ export default function Home() {
           />
         </div>
 
-        {/* Hover Tooltip - Enhanced UX - Responsive */}
+        {/* Enhanced Hover Tooltip - Large, Responsive, Single Instance */}
         {hoveredVenueData && hoveredVenue !== selectedVenue && (
           <div 
-            className="fixed sm:absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50 px-4 w-full sm:w-auto max-w-[90vw] sm:max-w-md"
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50 px-4 w-full max-w-[95vw] sm:max-w-2xl"
             style={{ 
-              animation: 'fadeIn 0.2s ease-in-out',
+              animation: 'fadeIn 0.3s ease-in-out',
             }}
           >
-            <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 backdrop-blur-xl border-2 border-blue-500/50 rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl">
-              <div className="flex items-start justify-between gap-3 sm:gap-4 mb-2 sm:mb-3">
-                <div>
-                  <h3 className="text-white font-bold text-base sm:text-lg md:text-xl flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full animate-pulse" style={{ backgroundColor: hoveredVenueData?.color }}></div>
-                    <span className="line-clamp-1">{hoveredVenueData?.name}</span>
+            <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 backdrop-blur-2xl border-3 border-blue-500/60 rounded-3xl p-6 sm:p-8 shadow-2xl">
+              {/* Header */}
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex-1">
+                  <h3 className="text-white font-bold text-2xl sm:text-3xl flex items-center gap-3 mb-2">
+                    <div 
+                      className="w-4 h-4 sm:w-5 sm:h-5 rounded-full animate-pulse shadow-lg" 
+                      style={{ 
+                        backgroundColor: hoveredVenueData.color,
+                        boxShadow: `0 0 20px ${hoveredVenueData.color}`
+                      }}
+                    />
+                    <span className="line-clamp-2">{hoveredVenueData.name}</span>
                   </h3>
-                  <div className="text-slate-400 text-xs sm:text-sm mt-1">
-                    {hoveredVenueData && floors[hoveredVenueData.floor]?.name || `Floor ${(hoveredVenueData?.floor ?? 0) + 1}`}
+                  <div className="text-slate-300 text-base sm:text-lg flex items-center gap-2">
+                    <Building className="w-4 h-4 sm:w-5 sm:h-5" />
+                    {floors[hoveredVenueData.floor]?.name || `Floor ${hoveredVenueData.floor + 1}`}
                   </div>
                 </div>
                 <div 
-                  className="px-2 sm:px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"
+                  className="px-4 py-2 rounded-xl text-sm sm:text-base font-bold whitespace-nowrap shadow-lg"
                   style={{ 
-                    backgroundColor: `${hoveredVenueData?.color}30`,
-                    color: hoveredVenueData?.color,
-                    border: `1px solid ${hoveredVenueData?.color}50`
+                    backgroundColor: `${hoveredVenueData.color}40`,
+                    color: hoveredVenueData.color,
+                    border: `2px solid ${hoveredVenueData.color}80`,
+                    boxShadow: `0 0 15px ${hoveredVenueData.color}40`
                   }}
                 >
-                  {hoveredVenueData && getVenueTypeLabel(hoveredVenueData.color)}
+                  {getVenueTypeLabel(hoveredVenueData.color)}
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
-                <div className="bg-slate-800/50 rounded-lg p-2 sm:p-3 border border-slate-700/50">
-                  <div className="text-slate-400 text-[10px] sm:text-xs mb-1">Capacity</div>
-                  <div className="text-white font-bold text-sm sm:text-base md:text-lg flex items-center gap-1">
-                    <Users className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />
-                    {hoveredVenueData?.capacity}
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-4 mb-5">
+                <div className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-xl p-4 border-2 border-blue-500/40 shadow-lg">
+                  <div className="text-slate-400 text-sm mb-2 flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Capacity
                   </div>
+                  <div className="text-white font-bold text-3xl sm:text-4xl">
+                    {hoveredVenueData.capacity}
+                  </div>
+                  <div className="text-slate-400 text-xs mt-1">people</div>
                 </div>
-                <div className="bg-slate-800/50 rounded-lg p-2 sm:p-3 border border-slate-700/50">
-                  <div className="text-slate-400 text-[10px] sm:text-xs mb-1">Dimensions</div>
-                  <div className="text-white font-bold text-xs sm:text-sm">
-                    {hoveredVenueData?.size.width.toFixed(0)}m × {hoveredVenueData?.size.depth.toFixed(0)}m
+                <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-4 border-2 border-purple-500/40 shadow-lg">
+                  <div className="text-slate-400 text-sm mb-2">Dimensions</div>
+                  <div className="text-white font-bold text-2xl sm:text-3xl">
+                    {hoveredVenueData.size.width.toFixed(0)} × {hoveredVenueData.size.depth.toFixed(0)}
                   </div>
+                  <div className="text-slate-400 text-xs mt-1">meters</div>
                 </div>
               </div>
 
-              {hoveredVenueData && getActivitiesByVenue(activities, hoveredVenueData.id).length > 0 && (
-                <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-lg p-2 sm:p-3 border border-blue-500/30">
-                  <div className="text-blue-300 text-[10px] sm:text-xs font-semibold mb-1 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
+              {/* Activities Section */}
+              {getActivitiesByVenue(activities, hoveredVenueData.id).length > 0 && (
+                <div className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 rounded-xl p-4 border-2 border-green-500/40 mb-4">
+                  <div className="text-green-300 text-base sm:text-lg font-semibold mb-2 flex items-center gap-2">
+                    <Clock className="w-5 h-5" />
                     Active Sessions
                   </div>
-                  <div className="text-white text-xs sm:text-sm font-medium">
-                    {getActivitiesByVenue(activities, hoveredVenueData.id).length} activity(ies) scheduled
+                  <div className="text-white text-xl sm:text-2xl font-bold">
+                    {getActivitiesByVenue(activities, hoveredVenueData.id).length} {getActivitiesByVenue(activities, hoveredVenueData.id).length === 1 ? 'activity' : 'activities'} scheduled
                   </div>
                 </div>
               )}
 
-              <div className="mt-2 sm:mt-3 text-center text-slate-500 text-[10px] sm:text-xs">
-                Click to select and view details
+              {/* Action Prompt */}
+              <div className="mt-5 pt-4 border-t border-slate-700/50 text-center">
+                <p className="text-slate-400 text-base sm:text-lg font-medium">
+                  👆 Click to select and view full details
+                </p>
               </div>
             </div>
           </div>

@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useRef, useState } from 'react'
+import React, { useRef, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Html } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { Venue } from '@/lib/types'
 
@@ -34,7 +34,7 @@ function VenueBox({
   isMobile?: boolean
 }) {
   const meshRef = useRef<THREE.Mesh>(null)
-  const [localHovered, setLocalHovered] = useState(false)
+  const [localHovered, setLocalHovered] = React.useState(false)
 
   const handlePointerOver = () => {
     if (!isMobile) {  // Disable hover on mobile for better performance
@@ -81,7 +81,7 @@ function VenueBox({
       {/* Main venue box - proper rectangular room shape */}
       <mesh
         ref={meshRef}
-        position={[venue.position.x, venue.position.y + squareSize.height / 2, venue.position.z]}
+        position={[venue.position.x, venue.position.y, venue.position.z]}
         onClick={onClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
@@ -104,13 +104,12 @@ function VenueBox({
 
       {/* Floor plan base - solid colored rectangle showing room footprint */}
       {isOnCurrentFloor && (
-        <mesh 
-          position={[venue.position.x, venue.position.y + 0.05, venue.position.z]} 
+        <mesh
+          position={[venue.position.x, venue.position.y - squareSize.height / 2 + 0.02, venue.position.z]}
           rotation={[-Math.PI / 2, 0, 0]}
-          receiveShadow
         >
           <planeGeometry args={[squareSize.width, squareSize.depth]} />
-          <meshStandardMaterial 
+          <meshStandardMaterial
             color={isSelected ? '#FCD34D' : isHighlighted ? '#60A5FA' : venue.color}
             metalness={0.6}
             roughness={0.4}
@@ -137,7 +136,7 @@ function VenueBox({
             // Left edge
             { start: [-squareSize.width/2, 0, squareSize.depth/2], end: [-squareSize.width/2, 0, -squareSize.depth/2] },
           ].map((edge, idx) => (
-            <mesh 
+            <mesh
               key={`boundary-${idx}`}
               position={[
                 venue.position.x + (edge.start[0] + edge.end[0]) / 2,
@@ -151,7 +150,7 @@ function VenueBox({
                 0.3,
                 0.15
               ]} />
-              <meshStandardMaterial 
+              <meshStandardMaterial
                 color={isSelected ? '#FFFFFF' : isHighlighted ? '#60A5FA' : '#1e293b'}
                 metalness={0.8}
                 roughness={0.2}
@@ -172,18 +171,18 @@ function VenueBox({
               {/* Vertical divider lines */}
               <mesh position={[-squareSize.width/2 + (i + 1) * (squareSize.width / (Math.floor(squareSize.width / 5) + 1)), 0, 0]}>
                 <boxGeometry args={[0.05, 0.02, squareSize.depth * 0.9]} />
-                <meshStandardMaterial 
-                  color="#64748b" 
-                  transparent 
+                <meshStandardMaterial
+                  color="#64748b"
+                  transparent
                   opacity={0.3}
                 />
               </mesh>
               {/* Horizontal divider lines */}
               <mesh position={[0, 0, -squareSize.depth/2 + (i + 1) * (squareSize.depth / (Math.floor(squareSize.depth / 5) + 1))]}>
                 <boxGeometry args={[squareSize.width * 0.9, 0.02, 0.05]} />
-                <meshStandardMaterial 
-                  color="#64748b" 
-                  transparent 
+                <meshStandardMaterial
+                  color="#64748b"
+                  transparent
                   opacity={0.3}
                 />
               </mesh>
@@ -198,9 +197,9 @@ function VenueBox({
                   {/* Rectangular desks/tables */}
                   <mesh position={[-squareSize.width/3 + i * (squareSize.width/2.5), 0.15, squareSize.depth/4]}>
                     <boxGeometry args={[Math.min(3, squareSize.width/6), 0.1, Math.min(2, squareSize.depth/8)]} />
-                    <meshStandardMaterial 
-                      color="#8B4513" 
-                      metalness={0.2} 
+                    <meshStandardMaterial
+                      color="#8B4513"
+                      metalness={0.2}
                       roughness={0.8}
                       emissive={isHighlighted ? '#60A5FA' : '#000000'}
                       emissiveIntensity={isHighlighted ? 0.3 : 0}
@@ -209,9 +208,9 @@ function VenueBox({
                   {/* Chairs - small squares */}
                   <mesh position={[-squareSize.width/3 + i * (squareSize.width/2.5), 0.2, squareSize.depth/4 + 1.2]}>
                     <boxGeometry args={[0.5, 0.5, 0.5]} />
-                    <meshStandardMaterial 
-                      color="#2c3e50" 
-                      metalness={0.3} 
+                    <meshStandardMaterial
+                      color="#2c3e50"
+                      metalness={0.3}
                       roughness={0.7}
                       emissive={isHighlighted ? '#60A5FA' : '#000000'}
                       emissiveIntensity={isHighlighted ? 0.3 : 0}
@@ -219,13 +218,13 @@ function VenueBox({
                   </mesh>
                 </React.Fragment>
               ))}
-              
+
               {/* Podium/Stage area - rectangular platform */}
               <mesh position={[0, 0.1, -squareSize.depth/3]}>
                 <boxGeometry args={[Math.min(4, squareSize.width/5), 0.2, Math.min(3, squareSize.depth/7)]} />
-                <meshStandardMaterial 
-                  color="#34495e" 
-                  metalness={0.4} 
+                <meshStandardMaterial
+                  color="#34495e"
+                  metalness={0.4}
                   roughness={0.6}
                   emissive={isHighlighted ? '#60A5FA' : '#000000'}
                   emissiveIntensity={isHighlighted ? 0.3 : 0}
@@ -233,38 +232,38 @@ function VenueBox({
               </mesh>
             </>
           )}
-          
+
           {/* Internal room partitions for larger venues */}
           {squareSize.width > 15 && (isSelected || isHighlighted) && (
             <>
               {/* Main partition wall - vertical */}
               <mesh position={[squareSize.width/4, 0.8, 0]} rotation={[0, 0, 0]}>
                 <boxGeometry args={[0.1, 1.5, squareSize.depth * 0.7]} />
-                <meshStandardMaterial 
-                  color="#95a5a6" 
-                  transparent 
-                  opacity={isSelected ? 0.5 : 0.3} 
-                  metalness={0.5} 
-                  roughness={0.5} 
+                <meshStandardMaterial
+                  color="#95a5a6"
+                  transparent
+                  opacity={isSelected ? 0.5 : 0.3}
+                  metalness={0.5}
+                  roughness={0.5}
                 />
               </mesh>
               <mesh position={[-squareSize.width/4, 0.8, 0]} rotation={[0, 0, 0]}>
                 <boxGeometry args={[0.1, 1.5, squareSize.depth * 0.7]} />
-                <meshStandardMaterial 
-                  color="#95a5a6" 
-                  transparent 
-                  opacity={isSelected ? 0.5 : 0.3} 
-                  metalness={0.5} 
-                  roughness={0.5} 
+                <meshStandardMaterial
+                  color="#95a5a6"
+                  transparent
+                  opacity={isSelected ? 0.5 : 0.3}
+                  metalness={0.5}
+                  roughness={0.5}
                 />
               </mesh>
 
               {/* Doorway indicators - gaps in walls */}
               <mesh position={[0, 0.5, squareSize.depth/2 - 0.1]}>
                 <boxGeometry args={[1.5, 2, 0.15]} />
-                <meshStandardMaterial 
-                  color="#1e293b" 
-                  metalness={0.6} 
+                <meshStandardMaterial
+                  color="#1e293b"
+                  metalness={0.6}
                   roughness={0.4}
                 />
               </mesh>
@@ -282,8 +281,8 @@ function VenueBox({
             renderOrder={renderOrder + 1}
           >
             <edgesGeometry args={[new THREE.BoxGeometry(squareSize.width, squareSize.height, squareSize.depth)]} />
-            <lineBasicMaterial 
-              color={isSelected ? '#FBBF24' : isHighlighted ? '#60A5FA' : venue.color} 
+            <lineBasicMaterial
+              color={isSelected ? '#FBBF24' : isHighlighted ? '#60A5FA' : venue.color}
               linewidth={isSelected ? 4 : isHighlighted ? 3 : 2}
               transparent
               opacity={isSelected ? 1 : isHighlighted ? 1 : 0.7}
@@ -296,7 +295,7 @@ function VenueBox({
               position={[venue.position.x, venue.position.y + squareSize.height / 2, venue.position.z]}
             >
               <boxGeometry args={[squareSize.width + 0.5, squareSize.height + 0.5, squareSize.depth + 0.5]} />
-              <meshBasicMaterial 
+              <meshBasicMaterial
                 color="#60A5FA"
                 transparent
                 opacity={0.2}
@@ -312,8 +311,8 @@ function VenueBox({
             renderOrder={renderOrder + 2}
           >
             <edgesGeometry args={[new THREE.PlaneGeometry(squareSize.width, squareSize.depth)]} />
-            <lineBasicMaterial 
-              color={isSelected ? '#FFFFFF' : isHighlighted ? '#60A5FA' : '#1e293b'} 
+            <lineBasicMaterial
+              color={isSelected ? '#FFFFFF' : isHighlighted ? '#60A5FA' : '#1e293b'}
               linewidth={isSelected ? 6 : isHighlighted ? 5 : 3}
               transparent
               opacity={1}
@@ -322,49 +321,11 @@ function VenueBox({
         </>
       )}
 
-      {/* Floating label - Always visible for current floor venues, bigger and clearer */}
-      {isOnCurrentFloor && (
-        <>
-          <Html 
-            position={[venue.position.x, venue.position.y + squareSize.height + 2.5, venue.position.z]} 
-            center
-            distanceFactor={6}
-            style={{ pointerEvents: 'none' }}
-          >
-            <div 
-              className={`text-white px-5 py-3 rounded-xl font-semibold whitespace-nowrap shadow-2xl backdrop-blur-sm transition-all duration-300 ${
-                isSelected 
-                  ? 'bg-gradient-to-r from-yellow-500 to-orange-500 border-3 border-white/50 scale-110' 
-                  : isHighlighted
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 border-2 border-white/40 scale-105'
-                  : 'bg-gradient-to-r from-slate-700 to-slate-800 border-2 border-white/20'
-              }`}
-              style={{
-                fontSize: isSelected ? '16px' : isHighlighted ? '15px' : '14px',
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <div 
-                  className={`w-2.5 h-2.5 rounded-full ${isSelected || isHighlighted ? 'animate-pulse' : ''}`}
-                  style={{ backgroundColor: isHighlighted ? '#60A5FA' : venue.color }}
-                ></div>
-                <span className="font-bold">{venue.name}</span>
-              </div>
-              <div className="text-xs text-white/80 mt-1 flex items-center gap-2">
-                <span>Capacity: {venue.capacity}</span>
-                <span>•</span>
-                <span>{venue.size.width.toFixed(0)}m × {venue.size.depth.toFixed(0)}m</span>
-              </div>
-            </div>
-          </Html>
-        </>
-      )}
-
       {/* Floor indicator beam for current floor */}
       {isOnCurrentFloor && !isSelected && !isHighlighted && (
         <mesh position={[venue.position.x, venue.position.y - 0.5, venue.position.z]}>
           <cylinderGeometry args={[0.5, 0.8, 1, 6]} />
-          <meshStandardMaterial 
+          <meshStandardMaterial
             color={venue.color}
             emissive={venue.color}
             emissiveIntensity={0.5}
@@ -380,35 +341,35 @@ function VenueBox({
           {/* Outer glow ring - rectangular */}
           <mesh position={[venue.position.x, venue.position.y + 0.02, venue.position.z]} rotation={[-Math.PI / 2, 0, 0]}>
             <ringGeometry args={[
-              Math.max(squareSize.width, squareSize.depth) / 1.8, 
-              Math.max(squareSize.width, squareSize.depth) / 1.6, 
+              Math.max(squareSize.width, squareSize.depth) / 1.8,
+              Math.max(squareSize.width, squareSize.depth) / 1.6,
               4  // 4 segments makes it square/rectangular
             ]} />
-            <meshBasicMaterial 
-              color={isHighlighted ? '#60A5FA' : venue.color} 
-              transparent 
+            <meshBasicMaterial
+              color={isHighlighted ? '#60A5FA' : venue.color}
+              transparent
               opacity={isSelected ? 0.6 : isHighlighted ? 0.7 : 0.4}
               toneMapped={false}
             />
           </mesh>
-          
+
           {/* Enhanced hover ring - pulsing effect */}
           {isHighlighted && !isSelected && (
             <mesh position={[venue.position.x, venue.position.y + 0.08, venue.position.z]} rotation={[-Math.PI / 2, 0, 0]}>
               <ringGeometry args={[
-                Math.max(squareSize.width, squareSize.depth) / 1.5, 
-                Math.max(squareSize.width, squareSize.depth) / 1.3, 
+                Math.max(squareSize.width, squareSize.depth) / 1.5,
+                Math.max(squareSize.width, squareSize.depth) / 1.3,
                 4
               ]} />
-              <meshBasicMaterial 
-                color="#60A5FA" 
-                transparent 
+              <meshBasicMaterial
+                color="#60A5FA"
+                transparent
                 opacity={0.8}
                 toneMapped={false}
               />
             </mesh>
           )}
-          
+
           {/* Corner markers - square room indicators */}
           {[
             [-squareSize.width/2, -squareSize.depth/2],
@@ -416,12 +377,12 @@ function VenueBox({
             [-squareSize.width/2, squareSize.depth/2],
             [squareSize.width/2, squareSize.depth/2],
           ].map(([x, z], idx) => (
-            <mesh 
+            <mesh
               key={`corner-${idx}`}
               position={[venue.position.x + x, venue.position.y + 0.1, venue.position.z + z]}
             >
               <boxGeometry args={[0.3, 0.2, 0.3]} />
-              <meshStandardMaterial 
+              <meshStandardMaterial
                 color={venue.color}
                 emissive={venue.color}
                 emissiveIntensity={isSelected ? 2 : isHighlighted ? 1.5 : 1}
