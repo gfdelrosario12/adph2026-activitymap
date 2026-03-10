@@ -145,40 +145,40 @@ export default function Home() {
           />
         </div>
 
-        {/* Enhanced Hover Tooltip - Large, Responsive, Single Instance */}
+        {/* Enhanced Hover Tooltip - Compact & Responsive */}
         {hoveredVenueData && hoveredVenue !== selectedVenue && (
           <div 
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50 px-4 w-full max-w-[95vw] sm:max-w-2xl"
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50 px-2 xs:px-3 sm:px-4 w-full max-w-[90vw] xs:max-w-[85vw] sm:max-w-md md:max-w-lg"
             style={{ 
               animation: 'fadeIn 0.3s ease-in-out',
             }}
           >
-            <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 backdrop-blur-2xl border-3 border-blue-500/60 rounded-3xl p-6 sm:p-8 shadow-2xl">
+            <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 backdrop-blur-2xl border-2 border-blue-500/60 rounded-xl sm:rounded-2xl p-3 xs:p-4 sm:p-5 shadow-2xl">
               {/* Header */}
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div className="flex-1">
-                  <h3 className="text-white font-bold text-2xl sm:text-3xl flex items-center gap-3 mb-2">
+              <div className="flex items-start justify-between gap-2 mb-2 sm:mb-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-white font-bold text-sm xs:text-base sm:text-lg md:text-xl flex items-center gap-2 mb-1">
                     <div 
-                      className="w-4 h-4 sm:w-5 sm:h-5 rounded-full animate-pulse shadow-lg" 
+                      className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 rounded-full animate-pulse shadow-lg flex-shrink-0" 
                       style={{ 
                         backgroundColor: hoveredVenueData.color,
-                        boxShadow: `0 0 20px ${hoveredVenueData.color}`
+                        boxShadow: `0 0 15px ${hoveredVenueData.color}`
                       }}
                     />
-                    <span className="line-clamp-2">{hoveredVenueData.name}</span>
+                    <span className="line-clamp-1 break-words">{hoveredVenueData.name}</span>
                   </h3>
-                  <div className="text-slate-300 text-base sm:text-lg flex items-center gap-2">
-                    <Building className="w-4 h-4 sm:w-5 sm:h-5" />
-                    {floors[hoveredVenueData.floor]?.name || `Floor ${hoveredVenueData.floor + 1}`}
+                  <div className="text-slate-300 text-[10px] xs:text-xs sm:text-sm flex items-center gap-1">
+                    <Building className="w-2.5 h-2.5 xs:w-3 xs:h-3 flex-shrink-0" />
+                    <span className="truncate">{floors[hoveredVenueData.floor]?.name || `Floor ${hoveredVenueData.floor + 1}`}</span>
                   </div>
                 </div>
                 <div 
-                  className="px-4 py-2 rounded-xl text-sm sm:text-base font-bold whitespace-nowrap shadow-lg"
+                  className="px-2 xs:px-2.5 sm:px-3 py-0.5 xs:py-1 rounded-md sm:rounded-lg text-[9px] xs:text-[10px] sm:text-xs font-bold whitespace-nowrap shadow-lg flex-shrink-0"
                   style={{ 
                     backgroundColor: `${hoveredVenueData.color}40`,
                     color: hoveredVenueData.color,
-                    border: `2px solid ${hoveredVenueData.color}80`,
-                    boxShadow: `0 0 15px ${hoveredVenueData.color}40`
+                    border: `1.5px solid ${hoveredVenueData.color}80`,
+                    boxShadow: `0 0 10px ${hoveredVenueData.color}40`
                   }}
                 >
                   {getVenueTypeLabel(hoveredVenueData.color)}
@@ -186,43 +186,43 @@ export default function Home() {
               </div>
               
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-4 mb-5">
-                <div className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-xl p-4 border-2 border-blue-500/40 shadow-lg">
-                  <div className="text-slate-400 text-sm mb-2 flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    Capacity
+              <div className="grid grid-cols-2 gap-2 mb-2 sm:mb-3">
+                <div className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-lg p-2 xs:p-2.5 border border-blue-500/40 shadow-lg">
+                  <div className="text-slate-400 text-[9px] xs:text-[10px] sm:text-xs mb-1 flex items-center gap-1">
+                    <Users className="w-2.5 h-2.5 xs:w-3 xs:h-3" />
+                    <span>Capacity</span>
                   </div>
-                  <div className="text-white font-bold text-3xl sm:text-4xl">
+                  <div className="text-white font-bold text-lg xs:text-xl sm:text-2xl">
                     {hoveredVenueData.capacity}
                   </div>
-                  <div className="text-slate-400 text-xs mt-1">people</div>
+                  <div className="text-slate-400 text-[8px] xs:text-[9px] sm:text-[10px]">people</div>
                 </div>
-                <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-4 border-2 border-purple-500/40 shadow-lg">
-                  <div className="text-slate-400 text-sm mb-2">Dimensions</div>
-                  <div className="text-white font-bold text-2xl sm:text-3xl">
+                <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-lg p-2 xs:p-2.5 border border-purple-500/40 shadow-lg">
+                  <div className="text-slate-400 text-[9px] xs:text-[10px] sm:text-xs mb-1">Size</div>
+                  <div className="text-white font-bold text-base xs:text-lg sm:text-xl">
                     {hoveredVenueData.size.width.toFixed(0)} × {hoveredVenueData.size.depth.toFixed(0)}
                   </div>
-                  <div className="text-slate-400 text-xs mt-1">meters</div>
+                  <div className="text-slate-400 text-[8px] xs:text-[9px] sm:text-[10px]">meters</div>
                 </div>
               </div>
 
               {/* Activities Section */}
               {getActivitiesByVenue(activities, hoveredVenueData.id).length > 0 && (
-                <div className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 rounded-xl p-4 border-2 border-green-500/40 mb-4">
-                  <div className="text-green-300 text-base sm:text-lg font-semibold mb-2 flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
-                    Active Sessions
+                <div className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 rounded-lg p-2 xs:p-2.5 border border-green-500/40 mb-2">
+                  <div className="text-green-300 text-[10px] xs:text-xs sm:text-sm font-semibold mb-0.5 flex items-center gap-1">
+                    <Clock className="w-3 h-3 xs:w-3.5 xs:h-3.5" />
+                    <span>Active Sessions</span>
                   </div>
-                  <div className="text-white text-xl sm:text-2xl font-bold">
-                    {getActivitiesByVenue(activities, hoveredVenueData.id).length} {getActivitiesByVenue(activities, hoveredVenueData.id).length === 1 ? 'activity' : 'activities'} scheduled
+                  <div className="text-white text-sm xs:text-base sm:text-lg font-bold">
+                    {getActivitiesByVenue(activities, hoveredVenueData.id).length} {getActivitiesByVenue(activities, hoveredVenueData.id).length === 1 ? 'activity' : 'activities'}
                   </div>
                 </div>
               )}
 
               {/* Action Prompt */}
-              <div className="mt-5 pt-4 border-t border-slate-700/50 text-center">
-                <p className="text-slate-400 text-base sm:text-lg font-medium">
-                  👆 Click to select and view full details
+              <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-slate-700/50 text-center">
+                <p className="text-slate-400 text-[10px] xs:text-xs sm:text-sm font-medium">
+                  👆 Click to view details
                 </p>
               </div>
             </div>

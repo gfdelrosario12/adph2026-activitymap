@@ -48,11 +48,11 @@ export default function StreamModal({ isOpen, onClose, stream }: StreamModalProp
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            exit={{ opacity: 0, scale: 0.9, y: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-2 xs:p-3 sm:p-4"
           >
-            <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden border-2 border-green-500/30">
+            <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-xl sm:rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden border-2 border-green-500/30">
               {/* Stream Video/Thumbnail Display */}
               <div className="relative aspect-video bg-black">
                 {stream.embedUrl ? (
@@ -103,59 +103,59 @@ export default function StreamModal({ isOpen, onClose, stream }: StreamModalProp
                 {/* Close Button */}
                 <button
                   onClick={onClose}
-                  className="absolute top-4 right-16 bg-black/60 backdrop-blur-sm hover:bg-black/80 text-white p-2 rounded-lg transition-colors z-10"
+                  className="absolute top-2 xs:top-3 sm:top-4 right-2 xs:right-3 sm:right-4 bg-black/60 backdrop-blur-sm hover:bg-black/80 text-white p-1.5 xs:p-2 rounded-md sm:rounded-lg transition-colors z-10"
                   aria-label="Close"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4 xs:w-5 xs:h-5" />
                 </button>
               </div>
 
               {/* Stream Details */}
-              <div className="p-6 max-h-[40vh] overflow-y-auto">
+              <div className="p-3 xs:p-4 sm:p-6 max-h-[40vh] overflow-y-auto">
                 {/* Title and Status */}
-                <div className="mb-4">
-                  <div className="flex items-start justify-between gap-4 mb-2">
-                    <h2 className="text-2xl font-bold text-white flex-1">{stream.title}</h2>
+                <div className="mb-3 sm:mb-4">
+                  <div className="flex items-start justify-between gap-2 sm:gap-4 mb-2">
+                    <h2 className="text-lg xs:text-xl sm:text-2xl font-bold text-white flex-1 line-clamp-2">{stream.title}</h2>
                     {stream.status === 'upcoming' && (
-                      <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+                      <span className="bg-yellow-500 text-black px-2 xs:px-3 py-0.5 xs:py-1 rounded-full text-[10px] xs:text-xs font-bold whitespace-nowrap">
                         UPCOMING
                       </span>
                     )}
                     {stream.status === 'ended' && (
-                      <span className="bg-slate-600 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+                      <span className="bg-slate-600 text-white px-2 xs:px-3 py-0.5 xs:py-1 rounded-full text-[10px] xs:text-xs font-bold whitespace-nowrap">
                         ENDED
                       </span>
                     )}
                   </div>
-                  <p className="text-green-400 font-semibold">{stream.speaker}</p>
+                  <p className="text-green-400 font-semibold text-sm xs:text-base">{stream.speaker}</p>
                 </div>
 
                 {/* Stats */}
-                <div className="flex items-center gap-6 mb-4 text-sm">
-                  <div className="flex items-center gap-2 text-slate-300">
-                    <Eye className="w-4 h-4 text-green-400" />
+                <div className="flex items-center gap-3 xs:gap-4 sm:gap-6 mb-3 sm:mb-4 text-xs xs:text-sm">
+                  <div className="flex items-center gap-1.5 xs:gap-2 text-slate-300">
+                    <Eye className="w-3 h-3 xs:w-4 xs:h-4 text-green-400" />
                     <span className="font-semibold text-white">{stream.viewers?.toLocaleString() || 0}</span>
-                    <span>viewers</span>
+                    <span className="hidden xs:inline">viewers</span>
                   </div>
                   {stream.startTime && (
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <Clock className="w-4 h-4 text-green-400" />
+                    <div className="flex items-center gap-1.5 xs:gap-2 text-slate-300">
+                      <Clock className="w-3 h-3 xs:w-4 xs:h-4 text-green-400" />
                       <span>{stream.startTime}</span>
                     </div>
                   )}
                 </div>
 
                 {/* Description */}
-                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-                  <h3 className="text-white font-semibold mb-2">About this stream</h3>
-                  <p className="text-slate-300 leading-relaxed">{stream.description}</p>
+                <div className="bg-slate-800/50 rounded-lg p-3 xs:p-4 border border-slate-700 mb-3 sm:mb-4">
+                  <h3 className="text-white font-semibold mb-2 text-sm xs:text-base">About this stream</h3>
+                  <p className="text-slate-300 leading-relaxed text-xs xs:text-sm">{stream.description}</p>
                 </div>
 
                 {/* Venue Info */}
                 {stream.venue && (
-                  <div className="mt-4 bg-green-600/20 rounded-lg p-4 border border-green-500/40">
-                    <h4 className="text-green-400 font-semibold mb-1 text-sm">Broadcasting from</h4>
-                    <p className="text-white">{stream.venue}</p>
+                  <div className="bg-green-600/20 rounded-lg p-3 xs:p-4 border border-green-500/40">
+                    <h4 className="text-green-400 font-semibold mb-1 text-xs xs:text-sm">Broadcasting from</h4>
+                    <p className="text-white text-sm xs:text-base">{stream.venue}</p>
                   </div>
                 )}
               </div>

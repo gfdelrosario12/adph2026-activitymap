@@ -5,7 +5,7 @@ import Link from 'next/link'
 import StreamCard from '@/components/StreamCard'
 import StreamModal from '@/components/StreamModal'
 import { motion } from 'framer-motion'
-import { ChevronLeft, Search, Radio, Menu, X } from 'lucide-react'
+import { ChevronLeft, Search, Radio, Menu, X, Eye } from 'lucide-react'
 import { LiveStream } from '@/lib/types'
 
 // Custom hook to load livestreams
@@ -147,6 +147,78 @@ function LivestreamsContent() {
           </div>
         ) : (
           <>
+            {/* Featured Live Stream Hero - Show first live stream as hero */}
+            {liveStreams.length > 0 && (
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 sm:mb-10 md:mb-12 lg:mb-16"
+              >
+                <div
+                  className="relative h-[200px] xs:h-[250px] sm:h-[350px] md:h-[450px] lg:h-[500px] rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden cursor-pointer group"
+                  onClick={() => setSelectedStream(liveStreams[0])}
+                >
+                  {/* Image and Video Tag */}
+                  <div className="absolute inset-0">
+                    <img
+                      src={liveStreams[0].thumbnail}
+                      alt={liveStreams[0].title}
+                      className="w-full h-full object-cover"
+                    />
+                    {liveStreams[0].status === 'live' && (
+                      <video
+                        autoPlay
+                        muted
+                        loop
+                        className="w-full h-full object-cover"
+                      >
+                        <source src={liveStreams[0].videoUrl} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                    )}
+                  </div>
+
+                  {/* Content Overlay */}
+                  <div className="relative h-full flex flex-col justify-end p-3 xs:p-4 sm:p-6 md:p-8 lg:p-10">
+                    {/* Live Badge */}
+                    <div className="absolute top-3 xs:top-4 sm:top-6 left-3 xs:left-4 sm:left-6 flex items-center gap-1.5 sm:gap-2 bg-red-600 px-2.5 xs:px-3 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] xs:text-xs sm:text-sm">
+                      <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white rounded-full animate-pulse" />
+                      <span className="text-white font-bold">LIVE NOW</span>
+                    </div>
+
+                    {/* Quality Badge */}
+                    <div className="absolute top-3 xs:top-4 sm:top-6 right-3 xs:right-4 sm:right-6 bg-black/60 backdrop-blur-sm px-2 xs:px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg">
+                      <span className="text-white text-[10px] xs:text-xs sm:text-sm font-semibold">{liveStreams[0].quality || '720p'}</span>
+                    </div>
+
+                    {/* Title and Info */}
+                    <h2 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3 md:mb-4 line-clamp-2">
+                      {liveStreams[0].title}
+                    </h2>
+                    <p className="text-slate-200 text-xs xs:text-sm sm:text-base md:text-lg mb-2 sm:mb-3 md:mb-4 line-clamp-2 max-w-3xl">
+                      {liveStreams[0].description}
+                    </p>
+
+                    <div className="flex items-center gap-2 xs:gap-3 sm:gap-4 md:gap-6 text-slate-300 text-xs xs:text-sm sm:text-base">
+                      <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2">
+                        <Eye className="w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5" />
+                        <span className="font-semibold">{liveStreams[0].viewers?.toLocaleString() || 0}</span>
+                      </div>
+                      <div className="truncate">
+                        {liveStreams[0].speaker}
+                      </div>
+                    </div>
+
+                    {/* Watch Now Button */}
+                    <button className="mt-3 xs:mt-4 sm:mt-6 bg-red-600 hover:bg-red-700 text-white px-4 xs:px-6 sm:px-8 py-2 xs:py-2.5 sm:py-3 rounded-md sm:rounded-lg text-xs xs:text-sm sm:text-base font-bold transition-all transform group-hover:scale-105 flex items-center gap-1.5 sm:gap-2 w-fit">
+                      <Radio className="w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5" />
+                      <span>Watch Now</span>
+                    </button>
+                  </div>
+                </div>
+              </motion.section>
+            )}
+
             {/* Live Streams Section */}
             {liveStreams.length > 0 && (
               <motion.section

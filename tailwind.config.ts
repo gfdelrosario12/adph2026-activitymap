@@ -10,7 +10,7 @@ const config = {
   theme: {
     extend: {
       screens: {
-        'xs': '475px',
+        'xs': '375px', // Extra small devices (small phones)
       },
       colors: {
         background: 'hsl(var(--background))',
