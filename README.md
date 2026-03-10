@@ -714,6 +714,84 @@ For detailed optimization documentation:
 
 ---
 
+## 🎮 Interactive 3D Controls
+
+### Camera Navigation
+
+**Mouse Controls:**
+- 🖱️ **Left Click + Drag** - Rotate camera around building
+- 🖱️ **Right Click + Drag** - Pan/Move view (horizontal & vertical)
+- 🖱️ **Middle Mouse/Scroll** - Zoom in/out
+- 🖱️ **Click Venue** - Select and view details
+
+**Touch Controls (Mobile/Tablet):**
+- 👆 **One Finger Drag** - Rotate camera
+- 🤏 **Two Finger Pinch** - Zoom in/out  
+- ✌️ **Two Finger Drag** - Pan/Move view
+
+**Control Settings:**
+- Pan Speed: 1.5x (faster repositioning)
+- Zoom Speed: 1.2x (smooth zooming)
+- Rotate Speed: 0.8x (controlled rotation)
+- Distance Range: 20-180 units
+- Max Polar Angle: 89.5° (can't flip upside down)
+
+**Navigation Tips:**
+💡 Use **right-click drag** to reposition when venues seem out of reach
+💡 Click **Reset View** button to return to default position
+💡 **Hover** over venues for quick info, **Click** for full schedule
+💡 On mobile, use **two-finger drag** for precise positioning
+
+---
+
+## 🏗️ 3D Visual Features
+
+### Complete Floor Plan Rendering
+- ✅ Solid colored rectangles (not wireframes)
+- ✅ Enclosed walls on all 4 sides per room
+- ✅ Professional architectural floor plan appearance
+- ✅ Smart opacity system (current floor: 95%, others: 25%)
+- ✅ Black borders for clear venue separation
+
+### Interactive Highlights
+- **Selected:** Gold (#FFD700) glow with 4.0x emissive intensity
+- **Hovered:** Cyan (#00FFFF) glow with 3.5x emissive intensity
+- **Current Floor:** Vibrant green (#10b981) highlight with outer ring
+- **Scale Effect:** 8% increase on hover, 5% on selection
+- **Multi-layer Glow:** Primary glow + outer halo effect
+- **Light Beam:** Vertical cylinder for selected venues
+
+### Smart Tooltip System
+
+**Quadrant-Based Positioning:**
+```
+Screen divided into 4 quadrants - tooltip appears opposite cursor
+┌─────────────────────────┐
+│ Cursor   │   Tooltip    │  Top-left → Tooltip bottom-right
+├──────────┼──────────────┤
+│ Tooltip  │    Cursor    │  Bottom-right → Tooltip top-left
+└─────────────────────────┘
+```
+
+**Features:**
+- Follows mouse at 60fps (throttled for performance)
+- Never blocks hovered venue or cursor
+- Stays within viewport bounds (20px padding)
+- Shows: Venue name, floor, capacity, activity count
+- Displays next activity with speaker
+- Compact design: 256px (mobile) to 288px (desktop)
+
+### Enhanced Lighting System
+- Main directional light: 2.0 intensity (bright white)
+- Ambient light: 0.6 intensity
+- Colored accent lights: Green & blue point lights
+- Hemisphere light: Sky (#87CEEB) to ground (#10b981)
+- Dramatic spotlight: 1.0 intensity from above
+- Environment map: City preset with custom light formers
+- Metalness: 0.5-0.8 for reflective surfaces
+
+---
+
 ## 🔮 Future Enhancements
 
 ### Potential Features

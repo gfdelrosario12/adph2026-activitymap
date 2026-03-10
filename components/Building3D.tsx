@@ -1104,10 +1104,22 @@ export default function Building3D({
           enableZoom={true}
           enableRotate={true}
           enabled={!animating}
-          minDistance={30}
+          minDistance={20}
           maxDistance={180}
           maxPolarAngle={Math.PI / 2.1}
           minPolarAngle={0.1}
+          panSpeed={1.5}
+          zoomSpeed={1.2}
+          rotateSpeed={0.8}
+          mouseButtons={{
+            LEFT: THREE.MOUSE.ROTATE,
+            MIDDLE: THREE.MOUSE.DOLLY,
+            RIGHT: THREE.MOUSE.PAN
+          }}
+          touches={{
+            ONE: THREE.TOUCH.ROTATE,
+            TWO: THREE.TOUCH.DOLLY_PAN
+          }}
         />
         
         {/* Lighting - Enhanced for better color visibility */}
