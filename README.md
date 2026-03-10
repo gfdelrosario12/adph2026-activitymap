@@ -18,20 +18,28 @@ A modern, interactive 3D building visualization system for navigating event venu
 - **Real-time Updates**: Dynamic venue and activity information
 
 ### 🎨 Architectural Details
-- **Penthouse Suite**: Glass penthouse on rooftop
-- **HVAC Systems**: Realistic rooftop ventilation units
-- **Communication Tower**: Antenna mast with beacon lights
-- **Helipad**: Functional landing pad with markings
-- **Balconies**: Every 3rd floor features outdoor balconies
-- **Accent Lighting**: LED strips and corner illumination
-- **Modern Entrance**: Glass doors with canopy and steps
+- **Penthouse Suite**: Modern glass penthouse on rooftop (60% building footprint)
+- **HVAC Systems**: 4 industrial AC units on rooftop corners
+- **Ventilation**: 2 cylindrical vents with industrial grills
+- **Communication Tower**: 6-meter antenna mast with red beacon light and satellite dishes
+- **Helipad**: Yellow circular landing pad with white "H" marking and glow effect
+- **Building Signage**: Green illuminated logo panel on top facade with emissive glow
+- **Balconies**: Every 3rd floor features outdoor balconies with glass/metal railings
+- **Accent Lighting**: Green LED strips every 4 floors, blue vertical corner lighting
+- **Modern Entrance**: 6m wide glass doors with blue tint, 3-tier steps, and canopy
+- **Facade Details**: Horizontal bands, corner accent strips, window frames
 
 ### 📺 Livestreaming Integration
-- **Live Streams**: Real-time event broadcasting
-- **Activity Links**: Watch streams directly from activity cards
-- **Stream Status**: Live, Upcoming, and Ended indicators
-- **Modal Player**: Full-screen video player with autoplay
+- **Autoplay Video**: Videos automatically play when modal opens
+- **Live Streams**: Real-time event broadcasting with status indicators
+- **Activity Links**: Watch streams directly from activity cards with play button
+- **Stream Status**: Live (red pulse), Upcoming (yellow), and Ended (gray) badges
+- **Modal Player**: Full-screen responsive video player with iframe embedding
+- **Thumbnail Fallbacks**: Black background with icon if no video/thumbnail available
 - **Search & Filter**: Find streams by title, speaker, or description
+- **Viewer Count**: Real-time viewer statistics display
+- **Quality Indicators**: HD, 1080p, 720p quality badges
+- **Responsive Player**: Adapts to mobile, tablet, and desktop screens
 
 ### 🎯 Activity Management
 - **Session Tracking**: View all activities per venue
@@ -222,60 +230,117 @@ OrbitControls: {
 
 ## 🎬 Livestream Setup
 
+### How Autoplay Works
+The system automatically adds autoplay parameters to video URLs:
+```typescript
+// Automatic URL modification
+"https://youtube.com/embed/VIDEO_ID" 
+→ "https://youtube.com/embed/VIDEO_ID?autoplay=1&mute=0"
+```
+
 ### Adding Streams
 
 1. **Prepare Video**
    - Upload to YouTube, Vimeo, or streaming platform
-   - Get embed URL
+   - Get embed URL (not regular watch URL)
+   - Example: `https://youtube.com/embed/YOUR_VIDEO_ID`
 
 2. **Create Thumbnail**
-   - Recommended: 1920x1080px
+   - Recommended: 1920x1080px (16:9 aspect ratio)
+   - Formats: JPG, PNG, WebP
    - Save to `/public/images/streams/`
+   - Use external URLs (configured in next.config.mjs)
 
-3. **Add to JSON**
+3. **Add to JSON** (`/public/data/livestreams.json`)
 ```json
 {
   "id": "stream-new",
-  "embedUrl": "https://youtube.com/embed/YOUR_VIDEO_ID?autoplay=1&mute=0",
-  "thumbnail": "/images/streams/your-thumbnail.jpg"
+  "title": "Workshop Title",
+  "description": "Detailed description...",
+  "speaker": "Speaker Name",
+  "embedUrl": "https://youtube.com/embed/YOUR_VIDEO_ID",
+  "thumbnail": "https://images.unsplash.com/photo-xxx",
+  "status": "live",
+  "quality": "1080p",
+  "viewers": 150,
+  "startTime": "2:00 PM",
+  "venue": "Main Hall"
 }
 ```
 
+### Stream Status Options
+- `"live"` - Currently broadcasting (red badge with pulse)
+- `"upcoming"` - Scheduled but not started (yellow badge)
+- `"ended"` - Past broadcast/recording (gray badge)
+
 ### Linking Activities to Streams
-Add `livestreamId` to activity:
+Add `livestreamId` to activity in `/public/data/activities.json`:
 ```json
 {
   "id": "activity1",
-  "livestreamId": "stream1"
+  "title": "Arduino Workshop",
+  "venue": "venue1",
+  "livestreamId": "stream1",
+  ...
 }
 ```
 
+When linked:
+- Play button appears on activity card
+- "STREAMING NOW" or "Stream Available" badge shown
+- Clicking button opens modal with autoplay
+
+### Thumbnail Requirements
+- **With embedUrl**: Thumbnail shows before clicking, video autoplays in modal
+- **Without embedUrl**: Only thumbnail shown with "Stream Preview" message
+- **Neither**: Black background with "No video available" message
+
 ## 🎯 Key Features Explained
 
-### Hover Tooltips
-- Compact design with key information
-- Capacity, dimensions, active sessions
-- Color-coded by venue type
-- Responsive sizing for all screens
+### Compact Hover Tooltips
+- **Size-Optimized Design**: Compact layout with essential information only
+- **Max Width**: 90vw mobile → 85vw xs → 448px sm → 512px md
+- **Content**: Venue name, floor, capacity, dimensions, active sessions
+- **Visual Indicators**: Color-coded dots, badges, and stats
+- **Responsive Sizing**: Scales perfectly from 320px to 2560px+ screens
+- **Action Prompt**: "Click to view details" with pointer emoji
 
 ### Floor Navigation
 - **Desktop**: Sidebar with up/down buttons + quick jump menu
 - **Mobile**: Bottom drawers for floor and venue selection
-- Current floor highlighted in 3D view
+- **Visual Feedback**: Current floor highlighted in 3D view with glow
+- **Quick Jump**: All floors list with venue count badges
+- **Smooth Transitions**: Animated floor changes with ease
 
 ### Stream Integration
-- Click play button on activities with streams
-- Opens modal with autoplay enabled
-- Shows live status, viewer count, quality
-- Fallback to thumbnail if no embed URL
+- **One-Click Play**: Click activity play button to open stream
+- **Autoplay Modal**: Video starts automatically when modal opens
+- **Live Indicators**: Real-time "STREAMING NOW" badges
+- **Multiple States**: Shows live status, viewer count, quality
+- **Error Handling**: Graceful fallbacks for missing content
+- **ESC to Close**: Keyboard shortcut for quick modal dismissal
 
 ### 3D Lighting System
-- Ambient light for base illumination
-- Directional sun light with shadows
-- Fill lights for depth
-- Hemisphere for natural gradient
-- Spot lights for dramatic effect
-- Environment map for reflections
+- **Ambient Light**: Base illumination at 0.35 intensity
+- **Directional Sun**: Main light at 1.5 intensity with 2048x2048 shadow maps
+- **Fill Lights**: Blue-tinted secondary light at 0.6 intensity
+- **Point Lights**: Purple accent from above at 0.5 intensity
+- **Spot Lights**: Green and indigo dramatic lighting
+- **Hemisphere Light**: Sky/ground gradient at 0.4 intensity
+- **Environment Map**: City preset with custom light formers
+- **ACES Tone Mapping**: Cinematic color grading at 1.2 exposure
+
+### 3D Building Details
+- **12 Floors**: Full building with Ground to 11th floor
+- **55m × 55m**: Large footprint to accommodate all venues
+- **Penthouse**: Glass structure at 60% building width
+- **Rooftop Elements**: HVAC units, vents, antenna, helipad
+- **Windows**: 12 per side per floor with blue tint
+- **Dynamic Opacity**: Current floor more transparent for viewing
+- **Balconies**: Every 3rd floor with railings
+- **Accent Bands**: Green strips every 4 floors
+- **Corner Lighting**: Blue vertical LED strips full height
+- **Entrance**: Glass doors, steps, canopy with pillars
 
 ## 🔧 Technical Stack
 
@@ -296,9 +361,13 @@ Add `livestreamId` to activity:
 ### Performance Features
 - Dynamic imports for code splitting
 - Image optimization with Next.js
-- Shadow map optimization
+- Shadow map optimization (2048x2048)
 - Responsive 3D quality (desktop vs mobile)
 - Efficient re-renders with React hooks
+- Lazy loading for livestream thumbnails
+- Soft shadows for better performance
+- Environment map caching
+- WebGL optimizations for Three.js
 
 ## 📊 Browser Support
 
@@ -317,21 +386,42 @@ Add `livestreamId` to activity:
 - Check WebGL support in browser
 - Update graphics drivers
 - Try different browser
+- Clear browser cache
+- Disable browser extensions
 
 ### Streams Not Playing
-- Verify embedUrl format
+- Verify embedUrl format (must be embed URL, not watch URL)
 - Check CORS settings
-- Ensure autoplay is allowed
+- Ensure autoplay is allowed in browser settings
+- Try different browser (some block autoplay)
+- Check if video URL is accessible
+
+### Images Not Loading
+- Verify thumbnail URLs are correct
+- Check external image domains in next.config.mjs
+- Ensure images are accessible (not behind auth)
+- Try using local images in /public/images/
 
 ### Performance Issues
-- Reduce shadow quality in Building3D.tsx
+- Reduce shadow quality in Building3D.tsx (change shadow-mapSize)
 - Lower maxDistance for OrbitControls
-- Use mobile optimization flag
+- Use mobile optimization flag (isMobile prop)
+- Disable environment map for lower-end devices
+- Reduce number of windows/architectural details
 
 ### Data Not Loading
-- Check JSON file syntax
+- Check JSON file syntax (use JSON validator)
 - Verify file paths in public/data/
 - Check browser console for errors
+- Ensure all required fields are present
+- Check for trailing commas in JSON
+
+### Modal Not Opening
+- Check if stream object has valid data
+- Verify StreamModal is imported correctly
+- Check z-index conflicts with other elements
+- Ensure isOpen state is updating properly
+- Check browser console for React errors
 
 ## 🤝 Contributing
 
@@ -375,17 +465,34 @@ For questions or support:
 
 ## 🗺️ Roadmap
 
+### Phase 1 - Core Features (Completed ✅)
+- [x] 3D building visualization with 12 floors
+- [x] Interactive venue navigation and selection
+- [x] Livestream integration with autoplay
+- [x] Activity management and scheduling
+- [x] Responsive design for all devices
+- [x] Realistic building architecture
+
+### Phase 2 - Enhanced Features (In Progress 🚧)
 - [ ] AR mode for on-site navigation
 - [ ] QR code venue check-ins
-- [ ] Real-time capacity updates
+- [ ] Real-time capacity updates via WebSocket
 - [ ] Interactive chat during streams
-- [ ] Speaker profiles and bios
-- [ ] Event calendar integration
-- [ ] Downloadable floor plans
-- [ ] Multi-language support
+- [ ] Push notifications for activity reminders
+
+### Phase 3 - Community Features (Planned 📋)
+- [ ] Speaker profiles and bios with photos
+- [ ] Event calendar integration with Google Calendar
+- [ ] Downloadable floor plans as PDF
+- [ ] Multi-language support (Filipino, English, Japanese)
+- [ ] User accounts and personalized schedules
+- [ ] Social sharing for activities and streams
+- [ ] Feedback and rating system
+- [ ] Photo gallery from events
+- [ ] Networking features for attendees
 
 ---
 
 **Built with ❤️ for Arduino Day Philippines 2026**
 
-*Experience Innovation in 3D**
+*Experience Innovation in 3D*
