@@ -24,7 +24,12 @@ function useLiveStreams() {
         const data = await res.json()
         
         if (mounted) {
-          setStreams(data)
+          // Ensure cover.png is used as fallback
+          const optimizedData = data.map((stream: LiveStream) => ({
+            ...stream,
+            thumbnail: stream.thumbnail || '/cover.png'
+          }))
+          setStreams(optimizedData)
           setLoading(false)
         }
       } catch (error) {
