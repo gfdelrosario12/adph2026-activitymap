@@ -205,9 +205,10 @@ function LivestreamsContent() {
                           src={liveStreams[0].thumbnail}
                           alt={liveStreams[0].title}
                           fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
                           className="object-cover"
                           priority
-                          unoptimized
+                          quality={90}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
                       </>
