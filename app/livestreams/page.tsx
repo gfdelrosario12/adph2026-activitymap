@@ -9,40 +9,64 @@ import { motion } from 'framer-motion'
 import { ChevronLeft, Search, Radio, Menu, X, Eye } from 'lucide-react'
 import { LiveStream } from '@/lib/types'
 
-// Custom hook to load livestreams - Optimized
+// Custom hook to load livestreams - Hardcoded streams
 function useLiveStreams() {
-  const [streams, setStreams] = React.useState<LiveStream[]>([])
-  const [loading, setLoading] = React.useState(true)
-
-  React.useEffect(() => {
-    let mounted = true
-    
-    const fetchStreams = async () => {
-      try {
-        const res = await fetch('/data/livestreams.json')
-        if (!res.ok) throw new Error('Failed to fetch streams')
-        const data = await res.json()
-        
-        if (mounted) {
-          setStreams(data)
-          setLoading(false)
-        }
-      } catch (error) {
-        console.error('Error loading streams:', error)
-        if (mounted) {
-          setLoading(false)
-        }
-      }
+  const [streams] = React.useState<LiveStream[]>([
+    {
+      id: "stream-main-hall",
+      title: "Main Hall",
+      description: "Main Auditorium - Live Coverage from the Main Hall",
+      speaker: "Arduino Day Philippines 2026",
+      venue: "Main Auditorium (12/F)",
+      embedUrl: "https://www.youtube.com/embed/4Id90OJHMg4",
+      thumbnail: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800",
+      status: "live",
+      quality: "1080p",
+      viewers: 450,
+      startTime: "09:00"
+    },
+    {
+      id: "stream-secondary-hall",
+      title: "Secondary Hall",
+      description: "Secondary Hall - Live Workshop & Sessions",
+      speaker: "Arduino Day Philippines 2026",
+      venue: "MPH 1 (1/F)",
+      embedUrl: "https://www.youtube.com/embed/KfO3q4yogXA",
+      thumbnail: "https://images.unsplash.com/photo-1540575467063-178f50002511?w=800",
+      status: "live",
+      quality: "720p",
+      viewers: 280,
+      startTime: "10:00"
+    },
+    {
+      id: "stream-workshop-1",
+      title: "Workshop 1",
+      description: "Workshop 1 - Hands-on Training & Projects",
+      speaker: "Arduino Day Philippines 2026",
+      venue: "Library (7/F)",
+      embedUrl: "https://www.youtube.com/embed/sgPU-ohXmkM",
+      thumbnail: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800",
+      status: "live",
+      quality: "720p",
+      viewers: 120,
+      startTime: "11:00"
+    },
+    {
+      id: "stream-workshop-2",
+      title: "Workshop 2",
+      description: "Workshop 2 - Advanced Techniques & Skills",
+      speaker: "Arduino Day Philippines 2026",
+      venue: "Computer Lab (6/F)",
+      embedUrl: "https://www.youtube.com/embed/F_o3yvrz9-s",
+      thumbnail: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800",
+      status: "live",
+      quality: "720p",
+      viewers: 95,
+      startTime: "12:00"
     }
+  ])
 
-    fetchStreams()
-    
-    return () => {
-      mounted = false
-    }
-  }, [])
-
-  return { streams, loading }
+  return { streams, loading: false }
 }
 
 function LivestreamsContent() {
