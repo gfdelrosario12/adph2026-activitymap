@@ -197,26 +197,31 @@ function LivestreamsContent() {
                   className="relative h-[200px] xs:h-[250px] sm:h-[350px] md:h-[450px] lg:h-[500px] rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden cursor-pointer group"
                   onClick={() => handleStreamSelect(liveStreams[0])}
                 >
-                  {/* Background Image/Thumbnail */}
+                  {/* Live Video Embed with Thumbnail Fallback */}
                   <div className="absolute inset-0 bg-black">
-                    {liveStreams[0].thumbnail ? (
-                      <>
-                        <Image
-                          src={liveStreams[0].thumbnail}
-                          alt={liveStreams[0].title}
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
-                          className="object-cover"
-                          priority
-                          quality={90}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Radio className="w-24 h-24 text-slate-800" />
-                      </div>
-                    )}
+                    {/* Video Embed - Primary */}
+                    <iframe
+                      className="absolute inset-0 w-full h-full"
+                      src={`${liveStreams[0].embedUrl}?autoplay=0&controls=0&modestbranding=1`}
+                      title={liveStreams[0].title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      loading="lazy"
+                      style={{ border: 'none' }}
+                    />
+                    {/* Thumbnail Fallback - Overlay */}
+                    <div className="absolute inset-0 bg-black opacity-20 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+                      <Image
+                        src={liveStreams[0].thumbnail}
+                        alt={liveStreams[0].title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
+                        className="object-cover"
+                        priority
+                        quality={90}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none" />
                   </div>
 
                   {/* Content Overlay */}

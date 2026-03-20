@@ -18,7 +18,7 @@ function useLiveStreams() {
       description: "Main Auditorium - Live Coverage from the Main Hall",
       speaker: "Arduino Day Philippines 2026",
       venue: "Main Auditorium (12/F)",
-      embedUrl: "https://www.youtube.com/embed/4Id90OJHMg4",
+      embedUrl: "https://www.youtube.com/embed/fnxplvm1Nb8",
       thumbnail: "/cover.png",
       status: "live",
       quality: "1080p",
@@ -31,7 +31,7 @@ function useLiveStreams() {
       description: "Secondary Hall - Live Workshop & Sessions",
       speaker: "Arduino Day Philippines 2026",
       venue: "MPH 1 (1/F)",
-      embedUrl: "https://www.youtube.com/embed/KfO3q4yogXA",
+      embedUrl: "https://www.youtube.com/embed/yeO5F7INMxA",
       thumbnail: "/cover.png",
       status: "live",
       quality: "720p",
@@ -44,7 +44,7 @@ function useLiveStreams() {
       description: "Workshop 1 - Hands-on Training & Projects",
       speaker: "Arduino Day Philippines 2026",
       venue: "Library (7/F)",
-      embedUrl: "https://www.youtube.com/embed/sgPU-ohXmkM",
+      embedUrl: "https://www.youtube.com/embed/YquHDILvRFg",
       thumbnail: "/cover.png",
       status: "live",
       quality: "720p",
@@ -57,7 +57,7 @@ function useLiveStreams() {
       description: "Workshop 2 - Advanced Techniques & Skills",
       speaker: "Arduino Day Philippines 2026",
       venue: "Computer Lab (6/F)",
-      embedUrl: "https://www.youtube.com/embed/F_o3yvrz9-s",
+      embedUrl: "https://www.youtube.com/embed/KpOjS78opvk",
       thumbnail: "/cover.png",
       status: "live",
       quality: "720p",
@@ -218,7 +218,7 @@ function LivestreamsContent() {
                   className="relative h-[200px] xs:h-[250px] sm:h-[350px] md:h-[450px] lg:h-[500px] rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden cursor-pointer group"
                   onClick={() => handleStreamSelect(liveStreams[0])}
                 >
-                  {/* Background Image/Thumbnail */}
+                  {/* Background Image/Thumbnail - No Video Playing */}
                   <div className="absolute inset-0 bg-black">
                     {liveStreams[0].thumbnail ? (
                       <>
